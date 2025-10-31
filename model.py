@@ -34,7 +34,7 @@ class Model():
 
 		self.logger.write('\tusing alphabet{}'.format(self.alphabet))
 		self.char_vec_len = len(self.alphabet) + 1 #plus one for <UNK> token
-		self.ascii_steps = args.tsteps/args.tsteps_per_ascii
+		self.ascii_steps = args.tsteps // args.tsteps_per_ascii
 
 
 		# ----- build the basic recurrent network architecture

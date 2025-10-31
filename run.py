@@ -75,7 +75,7 @@ def train_model(args):
 	model.sess.run(tf.assign(model.decay, args.decay ))
 	model.sess.run(tf.assign(model.momentum, args.momentum ))
 	running_average = 0.0 ; remember_rate = 0.99
-	for e in range(global_step/args.nbatches, args.nepochs):
+	for e in range(global_step // args.nbatches, args.nepochs):
 		model.sess.run(tf.assign(model.learning_rate, args.learning_rate * (args.lr_decay ** e)))
 		logger.write("learning rate: {}".format(model.learning_rate.eval()))
 
@@ -84,9 +84,9 @@ def train_model(args):
 		kappa = np.zeros((args.batch_size, args.kmixtures, 1))
 
 		for b in range(global_step%args.nbatches, args.nbatches):
-			
+
 			i = e * args.nbatches + b
-			if global_step is not 0 : i+=1 ; global_step = 0
+			if global_step != 0: i+=1 ; global_step = 0
 
 			if i % args.save_every == 0 and (i > 0):
 				model.saver.save(model.sess, args.save_path, global_step = i) ; logger.write('SAVED MODEL')
@@ -102,11 +102,11 @@ def train_model(args):
 			feed.update(valid_inputs)
 			feed[model.init_kappa] = np.zeros((args.batch_size, args.kmixtures, 1))
 			[valid_loss] = model.sess.run([model.cost], feed)
-			
+
 			running_average = running_average*remember_rate + train_loss*(1-remember_rate)
 
 			end = time.time()
-			if i % 10 is 0: logger.write("{}/{}, loss = {:.3f}, regloss = {:.5f}, valid_loss = {:.3f}, time = {:.3f}" \
+			if i % 10 == 0: logger.write("{}/{}, loss = {:.3f}, regloss = {:.5f}, valid_loss = {:.3f}, time = {:.3f}" \
 				.format(i, args.nepochs * args.nbatches, train_loss, running_average, valid_loss, end - start) )
 
 def sample_model(args, logger=None):

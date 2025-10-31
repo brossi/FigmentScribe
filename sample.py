@@ -1,6 +1,6 @@
 import numpy as np
 import tensorflow as tf
-import cPickle as pickle
+import pickle
 
 from utils import *
 
@@ -13,9 +13,9 @@ def sample_gaussian2d(mu1, mu2, s1, s2, rho):
 def get_style_states(model, args):
     c0, c1, c2 = model.istate_cell0.c.eval(), model.istate_cell1.c.eval(), model.istate_cell2.c.eval()
     h0, h1, h2 = model.istate_cell0.h.eval(), model.istate_cell1.h.eval(), model.istate_cell2.h.eval()
-    if args.style is -1: return [c0, c1, c2, h0, h1, h2] #model 'chooses' random style
+    if args.style == -1: return [c0, c1, c2, h0, h1, h2] #model 'chooses' random style
 
-    with open(os.path.join(args.data_dir, 'styles.p'),'r') as f:
+    with open(os.path.join(args.data_dir, 'styles.p'),'rb') as f:
         style_strokes, style_strings = pickle.load(f)
 
     style_strokes, style_string = style_strokes[args.style], style_strings[args.style]
@@ -24,8 +24,8 @@ def get_style_states(model, args):
     style_stroke = np.zeros((1, 1, 3), dtype=np.float32)
     style_kappa = np.zeros((1, args.kmixtures, 1))
     prime_len = 500 # must be <= 700
-    
-    for i in xrange(prime_len):
+
+    for i in range(prime_len):
         style_stroke[0][0] = style_strokes[i,:]
         feed = {model.input_data: style_stroke, model.char_seq: style_onehot, model.init_kappa: style_kappa, \
                 model.istate_cell0.c: c0, model.istate_cell1.c: c1, model.istate_cell2.c: c2, \
