@@ -17,7 +17,6 @@ ENV/
 
 # TensorFlow/Model files
 saved/
-saved_tf2/
 *.ckpt*
 *.h5
 checkpoint

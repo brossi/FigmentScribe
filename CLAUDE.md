@@ -413,7 +413,6 @@ scribe/
 ├── sample.py             # Sampling/generation script
 ├── utils.py              # Data loading (IAM format)
 ├── verify_data.py        # Data integrity checker
-├── extract_weights_tf1.py # TF 1.x weight extraction (migration utility)
 │
 ├── dataloader.ipynb      # Data exploration notebook
 ├── sample.ipynb          # Sampling walkthrough notebook
@@ -422,6 +421,7 @@ scribe/
 │   ├── model.py          #    Original TF 1.x model
 │   ├── run.py            #    Original TF 1.x training/sampling
 │   ├── sample.py         #    Original TF 1.x sampling utilities
+│   ├── extract_weights_tf1.py # Weight extraction utility
 │   └── README.md         #    Legacy usage instructions
 │
 ├── data/

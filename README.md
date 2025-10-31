@@ -247,7 +247,6 @@ scribe/
 ├── sample.py                 # Sampling/generation script
 ├── utils.py                  # Data loader and utilities
 ├── verify_data.py            # Data verification tool
-├── extract_weights_tf1.py    # TF 1.x checkpoint weight extraction (advanced)
 │
 ├── dataloader.ipynb          # Jupyter notebook: data exploration
 ├── sample.ipynb              # Jupyter notebook: model demonstration
@@ -256,12 +255,12 @@ scribe/
 │   ├── model.py              # Original TF 1.x model
 │   ├── run.py                # Original TF 1.x training/sampling
 │   ├── sample.py             # Original TF 1.x utilities
+│   ├── extract_weights_tf1.py # Checkpoint weight extraction utility
 │   └── README.md             # Legacy usage instructions
 │
 ├── requirements.txt          # Python 3.11 + TensorFlow 2.15 dependencies
 ├── README.md                 # This file
 ├── CLAUDE.md                 # Detailed codebase documentation
-├── README_TF2.md             # TensorFlow 2.x implementation guide
 │
 ├── data/
 │   ├── strokes_training_data.cpkl  # Training data (11,916 samples)
@@ -469,7 +468,7 @@ source venv-tf1/bin/activate  # On Windows: venv-tf1\Scripts\activate
 pip install tensorflow==1.15.5
 
 # Extract weights
-python3 extract_weights_tf1.py saved/model.ckpt-110500 weights_tf1.npz
+python3 legacy_tf1/extract_weights_tf1.py saved/model.ckpt-110500 weights_tf1.npz
 ```
 
 **Step 2: Load weights in TF 2.x**
