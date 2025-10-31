@@ -189,7 +189,7 @@ def verify_source_files():
     """Check that all source files exist"""
     print_header("Verifying Source Files")
 
-    required_files = ['model.py', 'run.py', 'utils.py', 'sample.py']
+    required_files = ['model.py', 'train.py', 'sample.py', 'utils.py', 'verify_data.py']
 
     all_good = True
     for file_name in required_files:

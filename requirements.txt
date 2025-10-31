@@ -7,7 +7,7 @@ matplotlib==3.8.3   # Visualization
 jupyter==1.0.0      # Notebook support (optional)
 
 # Installation:
-#   pip install -r requirements-tf2.txt
+#   pip install -r requirements.txt
 #
 # For Apple Silicon Macs:
 #   pip install tensorflow-macos==2.15.0 tensorflow-metal==1.1.0

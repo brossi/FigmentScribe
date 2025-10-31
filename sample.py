@@ -4,8 +4,8 @@ Sampling script for TensorFlow 2.x handwriting synthesis model.
 This replaces the session-based sampling in run.py with eager execution.
 
 Usage:
-    python sample_tf2.py --text "Hello World" --bias 1.5
-    python sample_tf2.py  # Uses default test strings
+    python sample.py --text "Hello World" --bias 1.5
+    python sample.py  # Uses default test strings
 """
 
 import tensorflow as tf
@@ -198,7 +198,7 @@ def main():
                        help='Style to use (-1 for random)')
 
     # I/O params
-    parser.add_argument('--save_path', type=str, default='saved_tf2/model',
+    parser.add_argument('--save_path', type=str, default='saved/model',
                        help='Path to saved model checkpoint')
     parser.add_argument('--log_dir', type=str, default='./logs/',
                        help='Directory for logs and figures')
@@ -271,7 +271,7 @@ def main():
         logger.write("ERROR: No saved model found!")
         logger.write(f"Expected checkpoint in: {checkpoint_dir}")
         logger.write("\nPlease train the model first using:")
-        logger.write("  python train_tf2.py")
+        logger.write("  python train.py")
 
 
 if __name__ == '__main__':

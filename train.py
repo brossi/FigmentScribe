@@ -5,7 +5,7 @@ This replaces the session-based training in run.py with eager execution
 and GradientTape-based training.
 
 Usage:
-    python train_tf2.py --rnn_size 400 --nmixtures 20 --nepochs 250
+    python train.py --rnn_size 400 --nmixtures 20 --nepochs 250
 """
 
 import tensorflow as tf
@@ -215,7 +215,7 @@ def main():
                        help='Directory for logs')
     parser.add_argument('--data_dir', type=str, default='./data',
                        help='Data directory')
-    parser.add_argument('--save_path', type=str, default='saved_tf2/model',
+    parser.add_argument('--save_path', type=str, default='saved/model',
                        help='Path to save checkpoints')
     parser.add_argument('--save_every', type=int, default=500,
                        help='Save checkpoint every N steps')
