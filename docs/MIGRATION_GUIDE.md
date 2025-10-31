@@ -23,9 +23,9 @@ This guide documents the complete migration path from Python 2.7/TensorFlow 1.0 
 
 ## Table of Contents
 
-0. [Phase 0: Data Verification](#phase-0-data-verification-required-first) ⭐ **START HERE**
+0. [Phase 0: Data Verification](#phase-0-data-verification-required-first) **Previously Completed and Referenced in docs/DATA_VERIFICATION_REPORT.md**
 1. [Pre-Migration Assessment](#pre-migration-assessment)
-2. [Phase 1: Python 3 Compatibility](#phase-1-python-3-compatibility)
+2. [Phase 1: Python 3 Compatibility] ⭐ **START HERE** (#phase-1-python-3-compatibility)
 3. [Phase 2: TensorFlow 2.x Migration](#phase-2-tensorflow-2x-migration)
 4. [Dependency Upgrades](#dependency-upgrades)
 5. [Testing Strategy](#testing-strategy)
