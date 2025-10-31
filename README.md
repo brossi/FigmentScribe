@@ -249,9 +249,14 @@ scribe/
 ├── verify_data.py            # Data verification tool
 ├── extract_weights_tf1.py    # TF 1.x checkpoint weight extraction (advanced)
 │
-├── model.py                  # Legacy TF 1.x implementation (reference only)
-├── run.py                    # Legacy TF 1.x script (reference only)
-├── sample.py                 # Legacy TF 1.x utilities (reference only)
+├── dataloader.ipynb          # Jupyter notebook: data exploration
+├── sample.ipynb              # Jupyter notebook: model demonstration
+│
+├── legacy_tf1/               # Legacy TensorFlow 1.x implementation (archived)
+│   ├── model.py              # Original TF 1.x model
+│   ├── run.py                # Original TF 1.x training/sampling
+│   ├── sample.py             # Original TF 1.x utilities
+│   └── README.md             # Legacy usage instructions
 │
 ├── requirements-tf2.txt      # Python dependencies
 ├── README.md                 # This file
@@ -266,13 +271,14 @@ scribe/
 ├── logs/                     # Training logs and generated figures
 │
 ├── docs/                     # Additional documentation
-│   ├── MIGRATION_GUIDE.md    # Historical migration documentation
-│   └── DATA_VERIFICATION_REPORT.md
+│   ├── MIGRATION_GUIDE.md    # Complete migration documentation
+│   ├── AUDIT_SUMMARY.md      # Code audit results
+│   ├── README.md             # Documentation index
+│   └── archive/              # Historical documentation
+│       ├── MIGRATION_EVALUATION.md
+│       └── DATA_VERIFICATION_REPORT.md
 │
-├── static/                   # Sample images and diagrams
-│
-├── dataloader.ipynb          # Jupyter notebook: data exploration
-└── sample.ipynb              # Jupyter notebook: model demonstration
+└── static/                   # Sample images and diagrams
 ```
 
 ---

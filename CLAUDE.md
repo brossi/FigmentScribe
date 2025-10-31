@@ -8,9 +8,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Scribe** is a handwriting synthesis neural network that generates realistic handwriting from text input. It implements Alex Graves' 2013 paper "Generating Sequences With Recurrent Neural Networks" using a 3-layer LSTM with attention mechanism and Mixture Density Network (MDN) output.
 
-**Current State:** Python 2.7 + TensorFlow 1.0 (original), with complete migration plan to Python 3.11 + TensorFlow 2.15
+**Current State:** Python 3.11 + TensorFlow 2.15 (PRIMARY) ✅ Migration Complete
+**Legacy:** Python 3 + TensorFlow 1.x (archived in `legacy_tf1/`)
 
-**Data:** 11,916 preprocessed IAM handwriting samples (vector strokes) in `data/strokes_training_data.cpkl` - **already verified and Python 3 compatible**
+**Data:** 11,916 preprocessed IAM handwriting samples (vector strokes) in `data/strokes_training_data.cpkl` - **verified and ready**
 
 ---
 
@@ -23,44 +24,44 @@ python3 verify_data.py
 # Expected: "SUCCESS! All checks passed!" with 11,916 samples
 ```
 
-### Training (Python 2.7 - Original)
+### Training (Python 3.11 + TensorFlow 2.15 - PRIMARY)
 ```bash
 # Basic training
-python run.py --train
+python3 train_tf2.py
+
+# High-quality training (recommended)
+python3 train_tf2.py --rnn_size 400 --nmixtures 20 --nepochs 250
 
 # Custom configuration
-python run.py --train \
+python3 train_tf2.py \
     --rnn_size 400 \
     --nmixtures 20 \
-    --tsteps 300 \
     --batch_size 32 \
     --nepochs 250 \
     --learning_rate 1e-4 \
-    --save_path saved/model.ckpt
+    --save_path saved_tf2/model
 ```
 
-### Sampling (Python 2.7 - Original)
+### Sampling (Python 3.11 + TensorFlow 2.15 - PRIMARY)
 ```bash
 # Generate handwriting
-mkdir -p logs/figures
-python run.py --sample --tsteps 700 --text "your text here"
+python3 sample_tf2.py --text "Hello World"
 
-# With style conditioning
-python run.py --sample --style 2 --bias 1.5 --text "styled text"
+# Control style with bias (higher = neater, lower = messier)
+python3 sample_tf2.py --text "Neat handwriting" --bias 2.0
+python3 sample_tf2.py --text "Messy handwriting" --bias 0.5
+
+# Generate default test strings
+python3 sample_tf2.py
 
 # Output: logs/figures/*.png
 ```
 
-### Migration (See docs/MIGRATION_GUIDE.md)
+### Legacy TensorFlow 1.x (ARCHIVED)
 ```bash
-# Phase 0: Data verification (COMPLETE)
-python3 verify_data.py
-
-# Phase 1: Python 3.8 + TF 1.15 (4-6 hours)
-# See docs/MIGRATION_GUIDE.md Phase 1 for detailed steps
-
-# Phase 2: Python 3.11 + TF 2.15 (2-3 days)
-# See docs/MIGRATION_GUIDE.md Phase 2 for TF 2.x implementation
+# Original TF 1.x implementation (requires TensorFlow 1.15)
+# Files located in legacy_tf1/ directory
+# See legacy_tf1/README.md for usage instructions
 ```
 
 ### Jupyter Notebooks
@@ -93,27 +94,41 @@ STROKE → LSTM1 ← [Window + Stroke]
   GENERATED STROKE
 ```
 
-### Key Components
+### Key Components (TensorFlow 2.x - PRIMARY)
 
-**model.py (222 lines)** - Neural network architecture
-- Lines 41-50: Three LSTM cells (100-400 hidden units each)
-- Lines 64-116: **Attention mechanism** (Gaussian window over text)
-- Lines 119-122: LSTM 2 & 3 with augmented inputs
-- Lines 124-179: **MDN output layer** (1 + nmixtures×6 parameters)
-- Lines 147-182: Loss function (mixture likelihood + binary cross-entropy)
+**model_tf2.py** - Neural network architecture (Keras API)
+- `HandwritingModel` class: Keras Model subclass
+- LSTM layers: Three stacked layers using `tf.keras.layers.LSTM`
+- **Attention mechanism**: Gaussian window over text (custom implementation)
+- **MDN output layer**: Mixture Density Network (1 + nmixtures×6 parameters)
+- Eager execution compatible, no sessions required
 
-**run.py (153 lines)** - Training/sampling orchestration
-- Lines 58-111: Training loop with session-based execution
-- Lines 112-149: Sampling loop with state management
+**train_tf2.py** - Training script
+- `@tf.function` decorated training loop for performance
+- `tf.GradientTape` for gradient computation
+- `tf.train.Checkpoint` for model saving
+- DataLoader from `utils.py` for IAM dataset
 
-**utils.py (227 lines)** - Data loading and preprocessing
-- Lines 10-202: DataLoader class (IAM dataset handling)
-- Lines 203-214: One-hot encoding for text
+**sample_tf2.py** - Sampling/generation script
+- Eager execution sampling loop
+- Bias control for randomness (0.5=messy, 2.0=neat)
+- Generates PNG images in `logs/figures/`
 
-**sample.py (160 lines)** - Sampling utilities and visualization
-- Lines 39-94: Generation loop with bias control
-- Lines 13-37: Style priming (experimental, unreliable)
-- Lines 96-159: Visualization functions (attention, heatmap, line plot)
+**utils.py** - Data loading and preprocessing (shared)
+- DataLoader class: IAM dataset handling (11,916 samples)
+- One-hot encoding for text
+- Python 3.11 compatible, used by both TF 1.x and TF 2.x
+
+**verify_data.py** - Data integrity verification
+- Validates preprocessed training data
+- Checks for 11,916 samples in correct format
+
+### Legacy Components (TensorFlow 1.x - ARCHIVED)
+
+**legacy_tf1/model.py** - Original TF 1.x model (session-based)
+**legacy_tf1/run.py** - Original TF 1.x training/sampling
+**legacy_tf1/sample.py** - Original TF 1.x sampling utilities
+**See `legacy_tf1/README.md` for details**
 
 ---
 
@@ -228,42 +243,35 @@ absolute_coords = np.cumsum(strokes[:, :2], axis=0)
 
 ## Migration Status
 
+### ✅ ALL PHASES COMPLETE - PRODUCTION READY
+
 ### Phase 0: Data Verification ✅ COMPLETE
 - **11,916 training samples** verified in `strokes_training_data.cpkl`
 - **Python 3 compatible** (loads with `encoding='latin1'`)
 - **IAM dataset download NOT needed** - preprocessed data is sufficient
-- **IAM_TrOCR-dataset removed** - was incompatible (raster images vs vector strokes)
 
-### Phase 1: Python 3 Compatibility (4-6 hours)
-**Target:** Python 3.8 + TensorFlow 1.15
+### Phase 1: Python 3 Compatibility ✅ COMPLETE
+- All Python 2.7 syntax converted to Python 3.11
+- Legacy TF 1.x files archived in `legacy_tf1/`
+- `cPickle` → `pickle`, `xrange()` → `range()`, etc.
+- **See:** `legacy_tf1/` for Python 3 compatible TF 1.x files
 
-**Required changes:**
-- `cPickle` → `pickle` (utils.py:5, sample.py:3)
-- `print` statements → `print()` functions (utils.py:224)
-- `xrange()` → `range()` (utils.py:185, sample.py:28)
-- Integer division `/` → `//` where needed (model.py:37, run.py:78)
-- Identity comparison `is` → `==` for non-singletons (sample.py:16, run.py:89, 109)
-- Binary file mode `'r'` → `'rb'` for pickle (sample.py:18)
+### Phase 2: TensorFlow 2.x Migration ✅ COMPLETE
+**Primary implementation:** Python 3.11 + TensorFlow 2.15
 
-**See:** `docs/MIGRATION_GUIDE.md` Phase 1 for line-by-line instructions
+**New TF 2.x files:**
+- `model_tf2.py`: Keras Model subclass with eager execution
+- `train_tf2.py`: Training with `@tf.function` and GradientTape
+- `sample_tf2.py`: Eager execution sampling
+- All using modern TF 2.15 APIs (no sessions, no placeholders)
 
-### Phase 2: TensorFlow 2.x Migration (2-3 days)
-**Target:** Python 3.11 + TensorFlow 2.15
-
-**Major changes required:**
-- Session-based execution → Eager execution
-- `tf.placeholder()` / `feed_dict` → Function arguments
+**Changes implemented:**
+- Session-based → Eager execution
+- `tf.placeholder()` → Function arguments
 - `tf.contrib.rnn.*` → `tf.keras.layers.LSTM`
-- `tf.contrib.legacy_seq2seq.rnn_decoder` → Custom RNN loop or `@tf.function`
-- `tf.global_variables()` → `model.variables`
 - `tf.train.Saver` → `tf.train.Checkpoint`
 
-**Complete TF 2.x implementation provided in migration guide**
-- `model_tf2.py`: Keras Model subclass (600+ lines)
-- `train_tf2.py`: Training script with GradientTape
-- `sample_tf2.py`: Sampling script for eager execution
-
-**See:** `docs/MIGRATION_GUIDE.md` Phase 2 for complete implementation
+**See:** `docs/MIGRATION_GUIDE.md` for complete migration documentation
 
 ---
 
@@ -271,14 +279,15 @@ absolute_coords = np.cumsum(strokes[:, :2], axis=0)
 
 ### Before Any Changes
 1. **ALWAYS verify data first:** `python3 verify_data.py`
-2. **Check migration status:** Current code is Python 2.7 + TF 1.0
-3. **Read migration guide:** `docs/MIGRATION_GUIDE.md` for context
+2. **Use TF 2.x files:** Use `*_tf2.py` files (model_tf2.py, train_tf2.py, sample_tf2.py)
+3. **Legacy reference:** TF 1.x files are in `legacy_tf1/` for reference only
 
 ### Understanding the Model
-1. **Start with architecture:** Read model.py lines 40-180
-2. **Attention mechanism:** Lines 64-116 (most complex part)
-3. **MDN output:** Lines 124-179 (second most complex)
-4. **Data flow:** Follow from run.py → model.py → sample.py
+1. **Start with architecture:** Read `model_tf2.py` (Keras Model implementation)
+2. **Attention mechanism:** Custom Gaussian window over text (most complex part)
+3. **MDN output:** Mixture Density Network layer (second most complex)
+4. **Data flow:** `train_tf2.py` → `model_tf2.py` → `sample_tf2.py`
+5. **Legacy reference:** See `legacy_tf1/model.py` for original TF 1.x implementation
 
 ### Modifying Hyperparameters
 
@@ -399,23 +408,40 @@ outputs, states = tf.contrib.legacy_seq2seq.rnn_decoder(
 
 ```
 scribe/
-├── model.py              # Network architecture (TF 1.x)
-├── run.py               # Training/sampling orchestration
-├── utils.py             # Data loading (IAM format)
-├── sample.py            # Sampling utilities & visualization
-├── verify_data.py       # Data integrity checker
-├── dataloader.ipynb     # Data exploration notebook
-├── sample.ipynb         # Sampling walkthrough notebook
+├── model_tf2.py          # TensorFlow 2.x model (PRIMARY)
+├── train_tf2.py          # TensorFlow 2.x training script
+├── sample_tf2.py         # TensorFlow 2.x sampling script
+├── utils.py              # Data loading (shared, IAM format)
+├── verify_data.py        # Data integrity checker
+├── extract_weights_tf1.py # TF 1.x weight extraction (migration utility)
+│
+├── dataloader.ipynb      # Data exploration notebook
+├── sample.ipynb          # Sampling walkthrough notebook
+│
+├── legacy_tf1/           # ← TensorFlow 1.x implementation (ARCHIVED)
+│   ├── model.py          #    Original TF 1.x model
+│   ├── run.py            #    Original TF 1.x training/sampling
+│   ├── sample.py         #    Original TF 1.x sampling utilities
+│   └── README.md         #    Legacy usage instructions
+│
 ├── data/
 │   ├── strokes_training_data.cpkl  # 11,916 samples (44 MB)
 │   └── styles.p                     # 5 style vectors (134 KB)
+│
 ├── docs/
-│   ├── MIGRATION_GUIDE.md          # Complete migration plan ⭐
-│   ├── MIGRATION_EVALUATION.md     # Technical review
-│   ├── DATA_VERIFICATION_REPORT.md # Phase 0 results
-│   └── README.md                   # Documentation index
-├── static/              # Sample output images
-└── README.md           # Project overview
+│   ├── MIGRATION_GUIDE.md    # Complete migration documentation ⭐
+│   ├── AUDIT_SUMMARY.md      # Code audit results
+│   ├── README.md             # Documentation index
+│   └── archive/              # ← Historical documentation
+│       ├── MIGRATION_EVALUATION.md
+│       └── DATA_VERIFICATION_REPORT.md
+│
+├── saved_tf2/            # TensorFlow 2.x model checkpoints (created during training)
+├── logs/                 # Training logs and generated figures
+├── static/               # Sample output images
+├── requirements-tf2.txt  # Python 3.11 + TF 2.15 dependencies
+├── README.md             # Project overview (TF 2.x focused)
+└── CLAUDE.md             # This file
 ```
 
 ---
@@ -462,13 +488,15 @@ scribe/
 
 ## Important Notes for Future Claude Instances
 
-1. **This is Python 2.7 + TensorFlow 1.0 code** - migration in progress to Python 3.11 + TF 2.15
-2. **Data is ready** - 11,916 samples verified, no IAM download needed
-3. **Attention mechanism (model.py:64-116) is the most complex component** - understand it first
-4. **MDN (model.py:124-179) is second most complex** - focus on parameter transformations
-5. **TF 1.x patterns are deprecated** - refer to migration guide for TF 2.x equivalents
-6. **Style priming is unreliable** - noted limitation in original implementation
+1. **✅ Migration COMPLETE** - This is now Python 3.11 + TensorFlow 2.15 (production ready)
+2. **Use TF 2.x files** - `model_tf2.py`, `train_tf2.py`, `sample_tf2.py` are the primary implementation
+3. **Legacy files archived** - TF 1.x implementation in `legacy_tf1/` for reference only
+4. **Data is ready** - 11,916 samples verified, no IAM download needed
+5. **Attention mechanism** is the most complex component - see `model_tf2.py`
+6. **MDN output** is second most complex - focus on parameter transformations
 7. **Delta encoding is critical** - all strokes are displacements, not absolute positions
-8. **Migration guide is comprehensive** - contains complete TF 2.x implementation
+8. **Style priming is unreliable** - noted limitation in original implementation
+9. **Eager execution** - TF 2.x uses no sessions, no placeholders, direct function calls
+10. **Migration history** - see `docs/MIGRATION_GUIDE.md` and `docs/AUDIT_SUMMARY.md`
 
-When helping with migration, **always reference `docs/MIGRATION_GUIDE.md`** for the detailed implementation plan and TF 2.x code examples.
+**For new work:** Use the TF 2.x implementation. Legacy TF 1.x files are for historical reference only.
