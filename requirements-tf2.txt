@@ -1,0 +1,14 @@
+# Phase 2: TensorFlow 2.x requirements
+# Python 3.11+ compatible
+
+tensorflow==2.15.0  # or tensorflow-macos==2.15.0 on Apple Silicon
+numpy==1.26.4       # Compatible with TF 2.15
+matplotlib==3.8.3   # Visualization
+jupyter==1.0.0      # Notebook support (optional)
+
+# Installation:
+#   pip install -r requirements-tf2.txt
+#
+# For Apple Silicon Macs:
+#   pip install tensorflow-macos==2.15.0 tensorflow-metal==1.1.0
+#   pip install numpy==1.26.4 matplotlib==3.8.3
