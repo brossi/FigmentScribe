@@ -3,6 +3,21 @@ Scribe: Realistic Handwriting in Tensorflow
 
 See [blog post](https://greydanus.github.io/2016/08/21/handwriting/)
 
+---
+
+## ⚠️ Migration to Python 3.11 + TensorFlow 2.15
+
+**This project was originally written for Python 2.7 + TensorFlow 1.0.**
+
+If you want to run this project on modern systems, see the **[Migration Documentation](docs/)** which includes:
+- ✅ Complete step-by-step migration guide
+- ✅ Python 3.11 compatibility updates
+- ✅ TensorFlow 2.15 implementation
+- ✅ Data verification (no IAM dataset download needed!)
+
+**Quick start:** Run `python3 verify_data.py` then follow `docs/MIGRATION_GUIDE.md`
+
+---
 
 Samples
 --------
