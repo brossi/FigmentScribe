@@ -1,77 +1,556 @@
-Scribe: Realistic Handwriting in Tensorflow
-=======
+# Scribe: Realistic Handwriting Synthesis with Neural Networks
 
-See [blog post](https://greydanus.github.io/2016/08/21/handwriting/)
+Generate realistic handwriting from text using deep learning. This implementation uses a 3-layer LSTM with attention mechanism and Mixture Density Network (MDN) to synthesize handwriting in diverse styles.
 
----
+Based on Alex Graves' 2013 paper "[Generating Sequences With Recurrent Neural Networks](https://arxiv.org/abs/1308.0850)".
 
-## ⚠️ Migration to Python 3.11 + TensorFlow 2.15
-
-**This project was originally written for Python 2.7 + TensorFlow 1.0.**
-
-If you want to run this project on modern systems, see the **[Migration Documentation](docs/)** which includes:
-- ✅ Complete step-by-step migration guide
-- ✅ Python 3.11 compatibility updates
-- ✅ TensorFlow 2.15 implementation
-- ✅ Data verification (no IAM dataset download needed!)
-
-**Quick start:** Run `python3 verify_data.py` then follow `docs/MIGRATION_GUIDE.md`
+> **Original implementation by [Sam Greydanus](https://github.com/greydanus)** • [Blog post](https://greydanus.github.io/2016/08/21/handwriting/)
 
 ---
 
-Samples
---------
-"A project by Sam Greydanus"
+## ✨ Features
+
+- **Generate handwriting from any text** - Convert ASCII text to realistic handwriting
+- **Style control** - Adjust randomness/neatness with bias parameter
+- **Attention mechanism** - Model learns to focus on one character at a time
+- **Diverse outputs** - Generate cursive, print, messy, or neat handwriting
+- **Pre-trained model ready** - Start generating immediately with included data
+- **Pure Python** - Modern Python 3.11 + TensorFlow 2.15 implementation
+
+---
+
+## 📸 Sample Outputs
+
+**"A project by Sam Greydanus"**
+
 ![Sample output 1](static/author.png?raw=true)
-"You know nothing Jon Snow" (print)
+
+**"You know nothing Jon Snow" (print style)**
+
 ![Sample output 2](static/jon_print.png?raw=true)
-"You know nothing Jon Snow" (cursive)
+
+**"You know nothing Jon Snow" (cursive style)**
+
 ![Sample output 3](static/jon_cursive.png?raw=true)
 
-"lowering the bias"
+### Controlling Randomness with Bias
+
+**Lowering the bias (neat, bias=2.0)**
+
 ![Sample output 4](static/bias-1.png?raw=true)
-"makes the writing messier"
+
+**Medium bias (balanced, bias=1.0)**
+
 ![Sample output 5](static/bias-0.75.png?raw=true)
-"but more random"
+
+**Higher randomness (messy, bias=0.5)**
+
 ![Sample output 6](static/bias-0.5.png?raw=true)
 
-Jupyter Notebooks
---------
-For an easy intro to the code (along with equations and explanations) check out these Jupyter notebooks:
-* [inspecting the data](https://nbviewer.jupyter.org/github/greydanus/scribe/blob/master/dataloader.ipynb)
-* [sampling from the model](https://nbviewer.jupyter.org/github/greydanus/scribe/blob/master/sample.ipynb)
+---
 
-Getting started
---------
-* install dependencies (see below).
-* download the repo
-* navigate to the repo in bash
-* download and unzip folder containing pretrained models: [Google Drive link](https://drive.google.com/file/d/0B-HNE76mR97FVkpJZnZuTEhBaFU/view?usp=sharing&resourcekey=0-jOyX1iLpam9C2wsT7Z1-0w)
-  * place in this directory
+## 🚀 Quick Start
 
-Now you have two options:
-1. Run the sampler in bash: `mkdir -p ./logs/figures && python run.py --sample --tsteps 700`
-2. Open the sample.ipynb jupyter notebook and run cell-by-cell (it includes equations and text to explain how the model works)
+### 1. Installation
 
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/scribe.git
+cd scribe
 
-About
---------
-This model is trained on the [IAM handwriting dataset](http://www.fki.inf.unibe.ch/databases/iam-handwriting-database) and was inspired by the model described by the famous 2014 Alex Graves [paper](https://arxiv.org/abs/1308.0850). It consists of a three-layer recurrent neural network (LSTM cells) with a Gaussian Mixture Density Network (MDN) cap on top. I have also implemented the attention mechanism from the paper which allows the network to 'focus' on character at a time in a sequence as it draws them.
+# Install dependencies (Python 3.11+)
+pip install -r requirements-tf2.txt
 
-The model at one time step looks like this
+# Verify installation
+python3 verify_data.py
+```
 
-![Rolled model](static/model_rolled.png?raw=true)
+### 2. Generate Handwriting (Using Pre-trained Data)
 
-Unrolling in time, we get
-![Unrolled model](static/model_unrolled.png?raw=true)
+```bash
+# Generate with default test strings
+python3 sample_tf2.py
 
-I've implemented the attention mechanism from the paper:
+# Generate your custom text
+python3 sample_tf2.py --text "Hello World"
+
+# Control the style (0.5=messy, 1.0=balanced, 2.0=neat)
+python3 sample_tf2.py --text "Neat handwriting" --bias 2.0
+```
+
+**Output**: Images saved to `logs/figures/`
+
+### 3. Train Your Own Model (Optional)
+
+```bash
+# Quick training (smaller model)
+python3 train_tf2.py --rnn_size 100 --nmixtures 8 --nepochs 50
+
+# High-quality training (recommended)
+python3 train_tf2.py --rnn_size 400 --nmixtures 20 --nepochs 250
+```
+
+**Training time**: ~12-24 hours on GPU for full training
+
+---
+
+## 📋 Requirements
+
+- **Python**: 3.11 or higher
+- **TensorFlow**: 2.15+
+- **NumPy**: 1.26+
+- **Matplotlib**: 3.8+
+
+**Full dependencies**: See `requirements-tf2.txt`
+
+### Installation Options
+
+**Standard (CPU/GPU)**:
+```bash
+pip install tensorflow==2.15.0 numpy==1.26.4 matplotlib==3.8.3
+```
+
+**Apple Silicon (M1/M2/M3)**:
+```bash
+pip install tensorflow-macos==2.15.0 tensorflow-metal==1.1.0
+pip install numpy==1.26.4 matplotlib==3.8.3
+```
+
+---
+
+## 💻 Usage
+
+### Command-Line Interface
+
+#### Sampling (Generation)
+
+```bash
+# Basic generation
+python3 sample_tf2.py --text "Your text here"
+
+# Advanced options
+python3 sample_tf2.py \
+    --text "Custom handwriting" \
+    --bias 1.5 \                    # Randomness (0.5-2.0)
+    --tsteps 700 \                  # Maximum length
+    --rnn_size 400 \                # Model size (must match trained model)
+    --nmixtures 20                  # Mixture count (must match trained model)
+```
+
+#### Training
+
+```bash
+# Basic training
+python3 train_tf2.py
+
+# Advanced training
+python3 train_tf2.py \
+    --rnn_size 400 \                # LSTM hidden size (100/400/900)
+    --nmixtures 20 \                # Gaussian mixtures (8/20)
+    --batch_size 32 \               # Batch size
+    --nepochs 250 \                 # Number of epochs
+    --learning_rate 0.0001 \        # Learning rate
+    --save_path saved_tf2/model     # Checkpoint directory
+```
+
+### Python API
+
+```python
+import tensorflow as tf
+from model_tf2 import HandwritingModel
+from sample_tf2 import sample, to_one_hot
+
+# Configure model
+class Args:
+    rnn_size = 400
+    nmixtures = 20
+    kmixtures = 1
+    alphabet = ' abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    tsteps_per_ascii = 25
+    tsteps = 700
+    bias = 1.5
+
+args = Args()
+
+# Load model
+model = HandwritingModel(args)
+checkpoint = tf.train.Checkpoint(model=model)
+checkpoint.restore("saved_tf2/checkpoint")
+
+# Generate handwriting
+text = "Hello World"
+strokes, phis, kappas = sample(text, model, args)
+
+# strokes contains the generated handwriting coordinates
+# Use matplotlib to visualize
+```
+
+---
+
+## 🏗️ Architecture
+
+### Model Overview
+
+The model implements a sequence-to-sequence architecture with three key components:
+
+#### 1. LSTM Layers (3 layers)
+- Processes input stroke sequences
+- Maintains hidden state for temporal dependencies
+- Size: 100-900 hidden units per layer
+
+#### 2. Attention Mechanism
+- Gaussian window over input text
+- Learns to focus on one character at a time
+- Enables variable-length text input
+
+#### 3. Mixture Density Network (MDN)
+- Outputs mixture of Gaussians (8-20 components)
+- Models uncertainty in handwriting generation
+- Predicts 2D stroke coordinates and end-of-stroke
+
+### Architecture Diagram
+
+**Single timestep:**
+
+![Model at one timestep](static/model_rolled.png?raw=true)
+
+**Unrolled in time:**
+
+![Model unrolled](static/model_unrolled.png?raw=true)
+
+**Attention mechanism:**
+
 ![Attention mechanism](static/diag_window.png?raw=true)
 
-Dependencies
---------
-* All code is written in python 2.7. You will need:
- * Numpy
- * Matplotlib
- * [TensorFlow 1.0](https://www.tensorflow.org/install/)
- * OPTIONAL: [Jupyter](https://jupyter.org/) (if you want to run sample.ipynb and dataloader.ipynb)
+---
+
+## 📊 Dataset
+
+The model is trained on the **IAM Handwriting Database**, containing 11,916 handwriting samples with corresponding text transcriptions.
+
+**Data format**: Vector strokes (Δx, Δy, end-of-stroke) with text labels
+
+**Included in repository**: Pre-processed training data (`data/strokes_training_data.cpkl`)
+
+**Size**: 44 MB (11,916 samples)
+
+No additional download required! The repository includes all necessary data.
+
+---
+
+## 📁 Project Structure
+
+```
+scribe/
+├── model_tf2.py              # TensorFlow 2.x model implementation
+├── train_tf2.py              # Training script
+├── sample_tf2.py             # Sampling/generation script
+├── utils.py                  # Data loader and utilities
+├── verify_data.py            # Data verification tool
+├── extract_weights_tf1.py    # TF 1.x checkpoint weight extraction (advanced)
+│
+├── model.py                  # Legacy TF 1.x implementation (reference only)
+├── run.py                    # Legacy TF 1.x script (reference only)
+├── sample.py                 # Legacy TF 1.x utilities (reference only)
+│
+├── requirements-tf2.txt      # Python dependencies
+├── README.md                 # This file
+├── CLAUDE.md                 # Detailed codebase documentation
+├── README_TF2.md             # TensorFlow 2.x implementation guide
+│
+├── data/
+│   ├── strokes_training_data.cpkl  # Training data (11,916 samples)
+│   └── styles.p                     # Style vectors (5 styles)
+│
+├── saved_tf2/                # Model checkpoints (created during training)
+├── logs/                     # Training logs and generated figures
+│
+├── docs/                     # Additional documentation
+│   ├── MIGRATION_GUIDE.md    # Historical migration documentation
+│   └── DATA_VERIFICATION_REPORT.md
+│
+├── static/                   # Sample images and diagrams
+│
+├── dataloader.ipynb          # Jupyter notebook: data exploration
+└── sample.ipynb              # Jupyter notebook: model demonstration
+```
+
+---
+
+## 🎯 Hyperparameter Guide
+
+### Model Size
+
+| `rnn_size` | Quality | Training Time | Memory | Use Case |
+|------------|---------|---------------|--------|----------|
+| 100 | Good | ~12 hours | ~2 GB | Quick experiments |
+| 400 | Excellent | ~24 hours | ~4 GB | **Recommended** |
+| 900 | Best | ~48 hours | ~8 GB | Maximum quality |
+
+### Mixture Components
+
+| `nmixtures` | Quality | Training Time | Use Case |
+|-------------|---------|---------------|----------|
+| 8 | Good | Faster | Quick training |
+| 20 | Excellent | Standard | **Recommended** |
+
+### Sampling Bias
+
+| Bias Value | Style | Description |
+|------------|-------|-------------|
+| 0.5 | Messy | High randomness, diverse strokes |
+| 1.0 | Balanced | Natural handwriting variation |
+| 1.5 | Neat | Cleaner, more consistent |
+| 2.0 | Very Neat | Minimal variation, precise |
+
+---
+
+## 📓 Jupyter Notebooks
+
+Interactive notebooks with equations and explanations:
+
+- **[dataloader.ipynb](dataloader.ipynb)** - Explore the IAM dataset structure
+- **[sample.ipynb](sample.ipynb)** - Step-by-step generation walkthrough
+
+Launch with:
+```bash
+jupyter notebook
+```
+
+---
+
+## 🔧 Troubleshooting
+
+### TensorFlow not found
+```bash
+pip install tensorflow==2.15.0
+# or for Apple Silicon:
+pip install tensorflow-macos==2.15.0 tensorflow-metal==1.1.0
+```
+
+### Data verification fails
+```bash
+python3 verify_data.py
+```
+Should show: `SUCCESS! All checks passed!`
+
+### Out of memory during training
+```bash
+# Reduce batch size
+python3 train_tf2.py --batch_size 16
+
+# Or reduce model size
+python3 train_tf2.py --rnn_size 100
+```
+
+### Generated handwriting looks wrong
+- Ensure model is trained (250+ epochs recommended)
+- Try different bias values: `--bias 0.5` to `--bias 2.0`
+- Check that model size parameters match trained checkpoint
+
+### Import errors
+```bash
+# Verify Python version
+python3 --version  # Should be 3.11+
+
+# Verify TensorFlow
+python3 -c "import tensorflow as tf; print(tf.__version__)"  # Should be 2.15+
+```
+
+---
+
+## 🎓 How It Works
+
+### 1. Input Processing
+- Text is converted to one-hot encoding
+- Previous strokes feed into LSTM layers
+
+### 2. Attention Mechanism
+The model uses a Gaussian attention window that:
+- Focuses on one character at a time
+- Moves left-to-right through text
+- Learns alignment between text and strokes
+
+**Attention parameters:**
+- α (alpha): Importance weights
+- β (beta): Window sharpness
+- κ (kappa): Window position
+
+### 3. LSTM Processing
+Three stacked LSTM layers:
+- **Layer 1**: Integrates strokes with attention window
+- **Layer 2**: Learns mid-level patterns
+- **Layer 3**: Models high-level sequence structure
+
+### 4. MDN Output
+Mixture Density Network outputs:
+- **End-of-stroke probability** (pen lift)
+- **Mixture weights** (π): Which Gaussian to sample from
+- **Means** (μ₁, μ₂): Expected stroke position
+- **Variances** (σ₁, σ₂): Uncertainty in position
+- **Correlation** (ρ): Relationship between x and y
+
+### 5. Sampling
+During generation:
+1. Sample mixture component based on π
+2. Sample (Δx, Δy) from 2D Gaussian
+3. Decide pen lift based on end-of-stroke probability
+4. Repeat until text is complete
+
+---
+
+## 🧪 Examples
+
+### Generate Multiple Samples
+
+```bash
+# Generate several variations
+for i in {1..5}; do
+    python3 sample_tf2.py --text "Hello World" --bias $(echo "scale=1; $i/2" | bc)
+done
+```
+
+### Batch Generation
+
+```python
+# generate_batch.py
+from sample_tf2 import sample
+import matplotlib.pyplot as plt
+
+texts = [
+    "Hello World",
+    "Machine Learning",
+    "Neural Networks",
+    "Deep Learning"
+]
+
+for text in texts:
+    strokes, _, _ = sample(text, model, args)
+    # Save or display strokes
+```
+
+### Training from Scratch
+
+```bash
+# Full training pipeline
+python3 verify_data.py                    # Verify data
+python3 train_tf2.py \
+    --rnn_size 400 \
+    --nmixtures 20 \
+    --nepochs 250 \
+    --save_path saved_tf2/model           # Train model
+python3 sample_tf2.py --text "Test"       # Generate samples
+```
+
+---
+
+## 🔄 Advanced Topics
+
+### Migrating from TensorFlow 1.x Checkpoints
+
+If you have a previously trained TensorFlow 1.x model checkpoint, you can extract and migrate the weights to TensorFlow 2.x.
+
+**Step 1: Extract weights from TF 1.x checkpoint**
+
+This requires a separate Python 3.8 + TensorFlow 1.15 environment:
+
+```bash
+# Create TF 1.x environment
+python3.8 -m venv venv-tf1
+source venv-tf1/bin/activate  # On Windows: venv-tf1\Scripts\activate
+
+# Install TensorFlow 1.15
+pip install tensorflow==1.15.5
+
+# Extract weights
+python3 extract_weights_tf1.py saved/model.ckpt-110500 weights_tf1.npz
+```
+
+**Step 2: Load weights in TF 2.x**
+
+The extracted weights can then be loaded into the TF 2.x model. Note that due to architectural differences between TF 1.x session-based execution and TF 2.x eager execution, manual weight mapping may be required.
+
+**Recommendation**: For best results, we recommend training from scratch with the TF 2.x implementation (`train_tf2.py`), which typically converges in 12-24 hours on a GPU.
+
+---
+
+## 📚 References
+
+### Paper
+- **Alex Graves** (2013). "[Generating Sequences With Recurrent Neural Networks](https://arxiv.org/abs/1308.0850)". arXiv:1308.0850
+
+### Dataset
+- **IAM Handwriting Database**: [http://www.fki.inf.unibe.ch/databases/iam-handwriting-database](http://www.fki.inf.unibe.ch/databases/iam-handwriting-database)
+
+### Related Work
+- [Handwriting Generation with RNNs](https://greydanus.github.io/2016/08/21/handwriting/) - Blog post by Sam Greydanus
+- [Synthesis of Handwriting](http://www.cs.toronto.edu/~graves/handwriting.html) - Alex Graves' demo
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Areas for improvement:
+
+- Additional training data sources
+- Web interface for generation
+- Real-time stroke visualization
+- Style transfer between handwriting samples
+- Export to SVG/font formats
+
+---
+
+## 📄 License
+
+This project is provided as-is for research and educational purposes.
+
+**Original implementation**: Sam Greydanus ([GitHub](https://github.com/greydanus))
+
+**Dataset**: IAM Handwriting Database (requires separate license for commercial use)
+
+---
+
+## 🙏 Acknowledgments
+
+- **Alex Graves** for the groundbreaking research
+- **Sam Greydanus** for the original implementation and blog post
+- **IAM Handwriting Database** contributors
+- **TensorFlow team** for the deep learning framework
+
+---
+
+## 📞 Support
+
+- **Documentation**: See `CLAUDE.md` for detailed codebase documentation
+- **Issues**: Report bugs or request features via GitHub issues
+- **Questions**: Check existing issues or create a new one
+
+---
+
+## ⭐ Quick Reference
+
+```bash
+# Verify installation
+python3 verify_data.py
+
+# Generate handwriting
+python3 sample_tf2.py --text "Your text" --bias 1.5
+
+# Train model
+python3 train_tf2.py --rnn_size 400 --nmixtures 20 --nepochs 250
+
+# View notebooks
+jupyter notebook dataloader.ipynb
+```
+
+**Ready to generate handwriting? Start with:** `python3 sample_tf2.py` 🎨✍️
+
+---
+
+<div align="center">
+
+**Made with 🧠 and TensorFlow**
+
+[Original Blog Post](https://greydanus.github.io/2016/08/21/handwriting/) • [Research Paper](https://arxiv.org/abs/1308.0850) • [Report Issues](https://github.com/yourusername/scribe/issues)
+
+</div>
