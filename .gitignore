@@ -1,1 +1,49 @@
+# Python
 *.pyc
+*.pyo
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+venv-phase1/
+venv-phase2/
+env/
+ENV/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# TensorFlow/Model files
+saved/
+saved_tf2/
+*.ckpt*
+*.h5
+checkpoint
+
+# Logs
+logs/
+*.log
+
+# Data files (except preprocessed)
+IAM_TrOCR-dataset/
+*-dataset/
+lineStrokes/
+ascii/
+
+# Backup files
+*.tar.gz
+*.zip
+archive.zip
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
