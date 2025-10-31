@@ -14,7 +14,7 @@ import argparse
 from pathlib import Path
 import os
 
-from model_tf2 import HandwritingModel
+from model import HandwritingModel
 from utils import Logger
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm

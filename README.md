@@ -59,7 +59,7 @@ git clone https://github.com/yourusername/scribe.git
 cd scribe
 
 # Install dependencies (Python 3.11+)
-pip install -r requirements-tf2.txt
+pip install -r requirements.txt
 
 # Verify installation
 python3 verify_data.py
@@ -69,13 +69,13 @@ python3 verify_data.py
 
 ```bash
 # Generate with default test strings
-python3 sample_tf2.py
+python3 sample.py
 
 # Generate your custom text
-python3 sample_tf2.py --text "Hello World"
+python3 sample.py --text "Hello World"
 
 # Control the style (0.5=messy, 1.0=balanced, 2.0=neat)
-python3 sample_tf2.py --text "Neat handwriting" --bias 2.0
+python3 sample.py --text "Neat handwriting" --bias 2.0
 ```
 
 **Output**: Images saved to `logs/figures/`
@@ -84,10 +84,10 @@ python3 sample_tf2.py --text "Neat handwriting" --bias 2.0
 
 ```bash
 # Quick training (smaller model)
-python3 train_tf2.py --rnn_size 100 --nmixtures 8 --nepochs 50
+python3 train.py --rnn_size 100 --nmixtures 8 --nepochs 50
 
 # High-quality training (recommended)
-python3 train_tf2.py --rnn_size 400 --nmixtures 20 --nepochs 250
+python3 train.py --rnn_size 400 --nmixtures 20 --nepochs 250
 ```
 
 **Training time**: ~12-24 hours on GPU for full training
@@ -101,7 +101,7 @@ python3 train_tf2.py --rnn_size 400 --nmixtures 20 --nepochs 250
 - **NumPy**: 1.26+
 - **Matplotlib**: 3.8+
 
-**Full dependencies**: See `requirements-tf2.txt`
+**Full dependencies**: See `requirements.txt`
 
 ### Installation Options
 
@@ -126,10 +126,10 @@ pip install numpy==1.26.4 matplotlib==3.8.3
 
 ```bash
 # Basic generation
-python3 sample_tf2.py --text "Your text here"
+python3 sample.py --text "Your text here"
 
 # Advanced options
-python3 sample_tf2.py \
+python3 sample.py \
     --text "Custom handwriting" \
     --bias 1.5 \                    # Randomness (0.5-2.0)
     --tsteps 700 \                  # Maximum length
@@ -141,24 +141,24 @@ python3 sample_tf2.py \
 
 ```bash
 # Basic training
-python3 train_tf2.py
+python3 train.py
 
 # Advanced training
-python3 train_tf2.py \
+python3 train.py \
     --rnn_size 400 \                # LSTM hidden size (100/400/900)
     --nmixtures 20 \                # Gaussian mixtures (8/20)
     --batch_size 32 \               # Batch size
     --nepochs 250 \                 # Number of epochs
     --learning_rate 0.0001 \        # Learning rate
-    --save_path saved_tf2/model     # Checkpoint directory
+    --save_path saved/model     # Checkpoint directory
 ```
 
 ### Python API
 
 ```python
 import tensorflow as tf
-from model_tf2 import HandwritingModel
-from sample_tf2 import sample, to_one_hot
+from model import HandwritingModel
+from sample import sample, to_one_hot
 
 # Configure model
 class Args:
@@ -175,7 +175,7 @@ args = Args()
 # Load model
 model = HandwritingModel(args)
 checkpoint = tf.train.Checkpoint(model=model)
-checkpoint.restore("saved_tf2/checkpoint")
+checkpoint.restore("saved/checkpoint")
 
 # Generate handwriting
 text = "Hello World"
@@ -242,9 +242,9 @@ No additional download required! The repository includes all necessary data.
 
 ```
 scribe/
-├── model_tf2.py              # TensorFlow 2.x model implementation
-├── train_tf2.py              # Training script
-├── sample_tf2.py             # Sampling/generation script
+├── model.py                  # Neural network architecture
+├── train.py                  # Training script
+├── sample.py                 # Sampling/generation script
 ├── utils.py                  # Data loader and utilities
 ├── verify_data.py            # Data verification tool
 ├── extract_weights_tf1.py    # TF 1.x checkpoint weight extraction (advanced)
@@ -258,7 +258,7 @@ scribe/
 │   ├── sample.py             # Original TF 1.x utilities
 │   └── README.md             # Legacy usage instructions
 │
-├── requirements-tf2.txt      # Python dependencies
+├── requirements.txt          # Python 3.11 + TensorFlow 2.15 dependencies
 ├── README.md                 # This file
 ├── CLAUDE.md                 # Detailed codebase documentation
 ├── README_TF2.md             # TensorFlow 2.x implementation guide
@@ -267,7 +267,7 @@ scribe/
 │   ├── strokes_training_data.cpkl  # Training data (11,916 samples)
 │   └── styles.p                     # Style vectors (5 styles)
 │
-├── saved_tf2/                # Model checkpoints (created during training)
+├── saved/                # Model checkpoints (created during training)
 ├── logs/                     # Training logs and generated figures
 │
 ├── docs/                     # Additional documentation
@@ -343,10 +343,10 @@ Should show: `SUCCESS! All checks passed!`
 ### Out of memory during training
 ```bash
 # Reduce batch size
-python3 train_tf2.py --batch_size 16
+python3 train.py --batch_size 16
 
 # Or reduce model size
-python3 train_tf2.py --rnn_size 100
+python3 train.py --rnn_size 100
 ```
 
 ### Generated handwriting looks wrong
@@ -412,7 +412,7 @@ During generation:
 ```bash
 # Generate several variations
 for i in {1..5}; do
-    python3 sample_tf2.py --text "Hello World" --bias $(echo "scale=1; $i/2" | bc)
+    python3 sample.py --text "Hello World" --bias $(echo "scale=1; $i/2" | bc)
 done
 ```
 
@@ -420,7 +420,7 @@ done
 
 ```python
 # generate_batch.py
-from sample_tf2 import sample
+from sample import sample
 import matplotlib.pyplot as plt
 
 texts = [
@@ -440,12 +440,12 @@ for text in texts:
 ```bash
 # Full training pipeline
 python3 verify_data.py                    # Verify data
-python3 train_tf2.py \
+python3 train.py \
     --rnn_size 400 \
     --nmixtures 20 \
     --nepochs 250 \
-    --save_path saved_tf2/model           # Train model
-python3 sample_tf2.py --text "Test"       # Generate samples
+    --save_path saved/model           # Train model
+python3 sample.py --text "Test"       # Generate samples
 ```
 
 ---
@@ -476,7 +476,7 @@ python3 extract_weights_tf1.py saved/model.ckpt-110500 weights_tf1.npz
 
 The extracted weights can then be loaded into the TF 2.x model. Note that due to architectural differences between TF 1.x session-based execution and TF 2.x eager execution, manual weight mapping may be required.
 
-**Recommendation**: For best results, we recommend training from scratch with the TF 2.x implementation (`train_tf2.py`), which typically converges in 12-24 hours on a GPU.
+**Recommendation**: For best results, we recommend training from scratch with the TF 2.x implementation (`train.py`), which typically converges in 12-24 hours on a GPU.
 
 ---
 
@@ -540,16 +540,16 @@ This project is provided as-is for research and educational purposes.
 python3 verify_data.py
 
 # Generate handwriting
-python3 sample_tf2.py --text "Your text" --bias 1.5
+python3 sample.py --text "Your text" --bias 1.5
 
 # Train model
-python3 train_tf2.py --rnn_size 400 --nmixtures 20 --nepochs 250
+python3 train.py --rnn_size 400 --nmixtures 20 --nepochs 250
 
 # View notebooks
 jupyter notebook dataloader.ipynb
 ```
 
-**Ready to generate handwriting? Start with:** `python3 sample_tf2.py` 🎨✍️
+**Ready to generate handwriting? Start with:** `python3 sample.py` 🎨✍️
 
 ---
 

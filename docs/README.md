@@ -73,7 +73,7 @@ Archived documentation from the migration process:
 **Phase 2: TensorFlow 2.x Migration** ✅ COMPLETE
 - Full TensorFlow 2.15 implementation complete
 - Eager execution, Keras API, modern checkpointing
-- Primary files: `model_tf2.py`, `train_tf2.py`, `sample_tf2.py`
+- Primary files: `model.py`, `train.py`, `sample.py`
 
 **Next Step:** Start using the TF 2.x implementation!
 
@@ -88,10 +88,10 @@ Archived documentation from the migration process:
 python3 verify_data.py
 
 # 2. Train model (TF 2.x)
-python3 train_tf2.py --rnn_size 400 --nmixtures 20
+python3 train.py --rnn_size 400 --nmixtures 20
 
 # 3. Generate handwriting (TF 2.x)
-python3 sample_tf2.py --text "Hello World" --bias 1.5
+python3 sample.py --text "Hello World" --bias 1.5
 ```
 
 ### For Understanding the Migration:

@@ -27,32 +27,32 @@ python3 verify_data.py
 ### Training (Python 3.11 + TensorFlow 2.15 - PRIMARY)
 ```bash
 # Basic training
-python3 train_tf2.py
+python3 train.py
 
 # High-quality training (recommended)
-python3 train_tf2.py --rnn_size 400 --nmixtures 20 --nepochs 250
+python3 train.py --rnn_size 400 --nmixtures 20 --nepochs 250
 
 # Custom configuration
-python3 train_tf2.py \
+python3 train.py \
     --rnn_size 400 \
     --nmixtures 20 \
     --batch_size 32 \
     --nepochs 250 \
     --learning_rate 1e-4 \
-    --save_path saved_tf2/model
+    --save_path saved/model
 ```
 
 ### Sampling (Python 3.11 + TensorFlow 2.15 - PRIMARY)
 ```bash
 # Generate handwriting
-python3 sample_tf2.py --text "Hello World"
+python3 sample.py --text "Hello World"
 
 # Control style with bias (higher = neater, lower = messier)
-python3 sample_tf2.py --text "Neat handwriting" --bias 2.0
-python3 sample_tf2.py --text "Messy handwriting" --bias 0.5
+python3 sample.py --text "Neat handwriting" --bias 2.0
+python3 sample.py --text "Messy handwriting" --bias 0.5
 
 # Generate default test strings
-python3 sample_tf2.py
+python3 sample.py
 
 # Output: logs/figures/*.png
 ```
@@ -96,20 +96,20 @@ STROKE → LSTM1 ← [Window + Stroke]
 
 ### Key Components (TensorFlow 2.x - PRIMARY)
 
-**model_tf2.py** - Neural network architecture (Keras API)
+**model.py** - Neural network architecture (Keras API)
 - `HandwritingModel` class: Keras Model subclass
 - LSTM layers: Three stacked layers using `tf.keras.layers.LSTM`
 - **Attention mechanism**: Gaussian window over text (custom implementation)
 - **MDN output layer**: Mixture Density Network (1 + nmixtures×6 parameters)
 - Eager execution compatible, no sessions required
 
-**train_tf2.py** - Training script
+**train.py** - Training script
 - `@tf.function` decorated training loop for performance
 - `tf.GradientTape` for gradient computation
 - `tf.train.Checkpoint` for model saving
 - DataLoader from `utils.py` for IAM dataset
 
-**sample_tf2.py** - Sampling/generation script
+**sample.py** - Sampling/generation script
 - Eager execution sampling loop
 - Bias control for randomness (0.5=messy, 2.0=neat)
 - Generates PNG images in `logs/figures/`
@@ -259,10 +259,10 @@ absolute_coords = np.cumsum(strokes[:, :2], axis=0)
 ### Phase 2: TensorFlow 2.x Migration ✅ COMPLETE
 **Primary implementation:** Python 3.11 + TensorFlow 2.15
 
-**New TF 2.x files:**
-- `model_tf2.py`: Keras Model subclass with eager execution
-- `train_tf2.py`: Training with `@tf.function` and GradientTape
-- `sample_tf2.py`: Eager execution sampling
+**Production files:**
+- `model.py`: Keras Model subclass with eager execution
+- `train.py`: Training with `@tf.function` and GradientTape
+- `sample.py`: Eager execution sampling
 - All using modern TF 2.15 APIs (no sessions, no placeholders)
 
 **Changes implemented:**
@@ -279,14 +279,14 @@ absolute_coords = np.cumsum(strokes[:, :2], axis=0)
 
 ### Before Any Changes
 1. **ALWAYS verify data first:** `python3 verify_data.py`
-2. **Use TF 2.x files:** Use `*_tf2.py` files (model_tf2.py, train_tf2.py, sample_tf2.py)
+2. **Use current files:** `model.py`, `train.py`, `sample.py` are the production implementation
 3. **Legacy reference:** TF 1.x files are in `legacy_tf1/` for reference only
 
 ### Understanding the Model
-1. **Start with architecture:** Read `model_tf2.py` (Keras Model implementation)
+1. **Start with architecture:** Read `model.py` (Keras Model implementation)
 2. **Attention mechanism:** Custom Gaussian window over text (most complex part)
 3. **MDN output:** Mixture Density Network layer (second most complex)
-4. **Data flow:** `train_tf2.py` → `model_tf2.py` → `sample_tf2.py`
+4. **Data flow:** `train.py` → `model.py` → `sample.py`
 5. **Legacy reference:** See `legacy_tf1/model.py` for original TF 1.x implementation
 
 ### Modifying Hyperparameters
@@ -408,10 +408,10 @@ outputs, states = tf.contrib.legacy_seq2seq.rnn_decoder(
 
 ```
 scribe/
-├── model_tf2.py          # TensorFlow 2.x model (PRIMARY)
-├── train_tf2.py          # TensorFlow 2.x training script
-├── sample_tf2.py         # TensorFlow 2.x sampling script
-├── utils.py              # Data loading (shared, IAM format)
+├── model.py              # Neural network architecture (Keras API)
+├── train.py              # Training script
+├── sample.py             # Sampling/generation script
+├── utils.py              # Data loading (IAM format)
 ├── verify_data.py        # Data integrity checker
 ├── extract_weights_tf1.py # TF 1.x weight extraction (migration utility)
 │
@@ -436,11 +436,11 @@ scribe/
 │       ├── MIGRATION_EVALUATION.md
 │       └── DATA_VERIFICATION_REPORT.md
 │
-├── saved_tf2/            # TensorFlow 2.x model checkpoints (created during training)
+├── saved/                # Model checkpoints (created during training)
 ├── logs/                 # Training logs and generated figures
 ├── static/               # Sample output images
-├── requirements-tf2.txt  # Python 3.11 + TF 2.15 dependencies
-├── README.md             # Project overview (TF 2.x focused)
+├── requirements.txt      # Python 3.11 + TensorFlow 2.15 dependencies
+├── README.md             # Project overview
 └── CLAUDE.md             # This file
 ```
 
@@ -489,14 +489,14 @@ scribe/
 ## Important Notes for Future Claude Instances
 
 1. **✅ Migration COMPLETE** - This is now Python 3.11 + TensorFlow 2.15 (production ready)
-2. **Use TF 2.x files** - `model_tf2.py`, `train_tf2.py`, `sample_tf2.py` are the primary implementation
+2. **Use current files** - `model.py`, `train.py`, `sample.py` are the production implementation
 3. **Legacy files archived** - TF 1.x implementation in `legacy_tf1/` for reference only
 4. **Data is ready** - 11,916 samples verified, no IAM download needed
-5. **Attention mechanism** is the most complex component - see `model_tf2.py`
+5. **Attention mechanism** is the most complex component - see `model.py`
 6. **MDN output** is second most complex - focus on parameter transformations
 7. **Delta encoding is critical** - all strokes are displacements, not absolute positions
 8. **Style priming is unreliable** - noted limitation in original implementation
-9. **Eager execution** - TF 2.x uses no sessions, no placeholders, direct function calls
+9. **Eager execution** - Uses no sessions, no placeholders, direct function calls
 10. **Migration history** - see `docs/MIGRATION_GUIDE.md` and `docs/AUDIT_SUMMARY.md`
 
-**For new work:** Use the TF 2.x implementation. Legacy TF 1.x files are for historical reference only.
+**For new work:** Use the current implementation in root directory. Legacy TF 1.x files are for historical reference only.

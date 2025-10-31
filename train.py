@@ -15,7 +15,7 @@ import time
 import os
 from pathlib import Path
 
-from model_tf2 import HandwritingModel, compute_loss
+from model import HandwritingModel, compute_loss
 from utils import DataLoader, Logger
 
 

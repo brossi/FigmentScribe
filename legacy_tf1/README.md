@@ -33,8 +33,8 @@ These files are **Python 3 compatible** but require **TensorFlow 1.15** to run. 
 
 ```bash
 # Modern TensorFlow 2.x commands (USE THESE)
-python3 train_tf2.py --rnn_size 400 --nmixtures 20
-python3 sample_tf2.py --text "Hello World" --bias 1.5
+python3 train.py --rnn_size 400 --nmixtures 20
+python3 sample.py --text "Hello World" --bias 1.5
 ```
 
 ## 📚 If You Need to Run These Files
@@ -92,4 +92,4 @@ These files were part of Phase 1 migration (Python 2.7 → Python 3.11):
 
 **Last Updated:** 2025-10-31
 **Status:** Archived for reference only
-**Replacement:** See `../model_tf2.py`, `../train_tf2.py`, `../sample_tf2.py`
+**Replacement:** See `../model.py`, `../train.py`, `../sample.py`
