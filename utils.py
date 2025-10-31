@@ -128,7 +128,7 @@ class DataLoader():
 
     def load_preprocessed(self, data_file):
         f = open(data_file,"rb")
-        [self.raw_stroke_data, self.raw_ascii_data] = pickle.load(f)
+        [self.raw_stroke_data, self.raw_ascii_data] = pickle.load(f, encoding='latin1')
         f.close()
 
         # goes thru the list, and only keeps the text entries that have more than tsteps points
@@ -157,7 +157,7 @@ class DataLoader():
                     self.ascii_data.append(self.raw_ascii_data[i])
 
         # minus 1, since we want the ydata to be a shifted version of x data
-        self.num_batches = int(len(self.stroke_data) / self.batch_size)
+        self.num_batches = len(self.stroke_data) // self.batch_size
         self.logger.write("\tloaded dataset:")
         self.logger.write("\t\t{} train individual data points".format(len(self.stroke_data)))
         self.logger.write("\t\t{} valid individual data points".format(len(self.valid_stroke_data)))

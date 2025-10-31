@@ -16,7 +16,7 @@ def get_style_states(model, args):
     if args.style == -1: return [c0, c1, c2, h0, h1, h2] #model 'chooses' random style
 
     with open(os.path.join(args.data_dir, 'styles.p'),'rb') as f:
-        style_strokes, style_strings = pickle.load(f)
+        style_strokes, style_strings = pickle.load(f, encoding='latin1')
 
     style_strokes, style_string = style_strokes[args.style], style_strings[args.style]
     style_onehot = [to_one_hot(style_string, model.ascii_steps, args.alphabet)]
