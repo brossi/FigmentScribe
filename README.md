@@ -370,6 +370,83 @@ Complete setup guide with troubleshooting: **[docs/COLAB_SETUP.md](docs/COLAB_SE
 
 ---
 
+## 🧪 Testing
+
+Scribe includes a comprehensive test suite to ensure code quality and catch regressions.
+
+### Quick Start
+
+```bash
+# Install testing dependencies
+pip install -r requirements-test.txt
+
+# Run all tests
+pytest
+
+# Run only smoke tests (fast, < 30 seconds)
+pytest -m smoke
+
+# Run with coverage report
+pytest --cov=. --cov-report=html
+
+# View coverage report
+open htmlcov/index.html  # macOS
+# or
+xdg-open htmlcov/index.html  # Linux
+```
+
+### Test Categories
+
+The test suite is organized into several categories:
+
+- **Smoke tests** (`-m smoke`): Quick sanity checks (< 30s total)
+- **Unit tests** (`tests/unit/`): Fast, isolated component tests
+- **Integration tests** (`tests/integration/`): End-to-end workflow tests
+- **Property tests** (`tests/property/`): Mathematical invariant tests
+- **Regression tests** (`tests/regression/`): Golden output comparisons
+
+### Running Specific Tests
+
+```bash
+# Run only unit tests
+pytest tests/unit -v
+
+# Run specific test file
+pytest tests/unit/test_smoke.py -v
+
+# Run specific test function
+pytest tests/unit/test_smoke.py::test_import_tensorflow -v
+
+# Run tests in parallel (faster)
+pytest -n auto
+
+# Run with detailed output
+pytest -vv --tb=long
+```
+
+### Test Coverage
+
+```bash
+# Generate coverage report
+pytest --cov=. --cov-report=html --cov-report=term
+
+# Check coverage for specific module
+pytest --cov=model --cov-report=term-missing
+
+# Fail if coverage below threshold
+pytest --cov=. --cov-fail-under=80
+```
+
+### Continuous Integration
+
+Tests run automatically on every commit via GitHub Actions (if configured). See `.github/workflows/tests.yml` for CI/CD configuration.
+
+### Writing New Tests
+
+See `tests/README.md` for guidelines on writing new tests and using fixtures.
+
+---
+
 ## 🔧 Troubleshooting
 
 ### TensorFlow not found

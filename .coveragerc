@@ -1,0 +1,107 @@
+[run]
+# Coverage.py configuration for Scribe handwriting synthesis tests
+
+# Source code directories to measure coverage for
+source = .
+
+# Directories and files to omit from coverage
+omit =
+    # Test files themselves
+    tests/*
+
+    # Legacy TensorFlow 1.x code (archived)
+    legacy_tf1/*
+
+    # Virtual environments
+    venv/*
+    venv-*/*
+    .venv/*
+
+    # Third-party code
+    handwriting-synthesis/*
+
+    # Generated/output files
+    logs/*
+    saved/*
+    static/*
+
+    # Notebooks (coverage doesn't handle .ipynb well)
+    *.ipynb
+    .ipynb_checkpoints/*
+
+    # Setup and configuration
+    setup.py
+
+    # Documentation
+    docs/*
+
+# Branch coverage (measure both true/false branches)
+branch = True
+
+# Parallel mode (for pytest-xdist)
+parallel = True
+
+[report]
+# Reporting options
+
+# Exclude lines from coverage (pragma comments)
+exclude_lines =
+    # Standard pragma
+    pragma: no cover
+
+    # Don't complain about missing debug code
+    def __repr__
+
+    # Don't complain if tests don't hit defensive assertion code
+    raise AssertionError
+    raise NotImplementedError
+
+    # Don't complain if non-runnable code isn't run
+    if 0:
+    if False:
+    if __name__ == .__main__.:
+
+    # Don't complain about abstract methods
+    @abstractmethod
+    @abc.abstractmethod
+
+    # Type checking blocks
+    if TYPE_CHECKING:
+
+    # Ellipsis in function stubs
+    \.\.\.
+
+# Precision for coverage percentages
+precision = 2
+
+# Show missing line numbers in report
+show_missing = True
+
+# Skip files with 100% coverage in report
+skip_covered = False
+
+# Skip empty files
+skip_empty = True
+
+# Sort by coverage percentage (lowest first)
+sort = Cover
+
+[html]
+# HTML report configuration
+
+# Output directory for HTML coverage report
+directory = htmlcov
+
+# Title for HTML report
+title = Scribe Handwriting Synthesis Test Coverage
+
+[xml]
+# XML report configuration (for CI/CD integration)
+
+output = coverage.xml
+
+[paths]
+# Map paths for coverage in different environments
+source =
+    .
+    */site-packages/

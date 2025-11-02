@@ -145,6 +145,43 @@ jupyter notebook
 # Open sample.ipynb for generation walkthrough with equations
 ```
 
+### Testing (NEW!)
+```bash
+# Install testing dependencies
+pip install -r requirements-test.txt
+
+# Run all tests
+pytest
+
+# Run smoke tests only (fast, < 30 seconds)
+pytest -m smoke
+
+# Run with coverage
+pytest --cov=. --cov-report=html
+
+# Run specific test category
+pytest tests/unit  # Unit tests only
+pytest tests/integration  # Integration tests only
+
+# Run tests in parallel (faster)
+pytest -n auto
+
+# View coverage report
+open htmlcov/index.html
+
+# Test markers available:
+# -m smoke: Quick sanity checks
+# -m unit: Unit tests
+# -m integration: Integration tests
+# -m slow: Tests taking > 5 seconds
+# -m property: Property-based tests (Hypothesis)
+# -m regression: Regression tests
+
+# Run with specific markers
+pytest -m "smoke or unit"  # Smoke and unit tests
+pytest -m "not slow"       # Skip slow tests
+```
+
 ---
 
 ## Architecture Overview
@@ -639,11 +676,27 @@ scribe/
 │       ├── MIGRATION_EVALUATION.md
 │       └── DATA_VERIFICATION_REPORT.md
 │
+├── tests/                # Test suite (NEW)
+│   ├── conftest.py       # Shared pytest fixtures
+│   ├── unit/             # Unit tests (fast, isolated)
+│   │   ├── test_smoke.py       # Smoke tests for basic validation
+│   │   ├── test_model.py       # Model architecture tests (TODO)
+│   │   ├── test_data_loader.py # Data loading tests (TODO)
+│   │   ├── test_sampling.py    # Sampling function tests (TODO)
+│   │   └── test_svg_output.py  # SVG generation tests (TODO)
+│   ├── integration/      # Integration tests (medium speed)
+│   ├── property/         # Property-based tests (Hypothesis)
+│   ├── regression/       # Regression tests (golden outputs)
+│   └── fixtures/         # Test data and fixtures
+│
 ├── saved/                # Model checkpoints (created during training)
 ├── logs/                 # Training logs and generated figures
 │   └── figures/          # PNG and SVG output (generated)
 ├── static/               # Sample output images
 ├── requirements.txt      # Python 3.11 + TensorFlow 2.15 + scipy + svgwrite
+├── requirements-test.txt # Testing dependencies (NEW)
+├── pytest.ini            # Pytest configuration (NEW)
+├── .coveragerc           # Coverage configuration (NEW)
 ├── README.md             # Project overview
 └── CLAUDE.md             # This file
 ```
@@ -706,6 +759,8 @@ scribe/
 12. **Multi-line generation** - `sample_multiline()` with per-line bias and style control
 13. **Eager execution** - Uses no sessions, no placeholders, direct function calls
 14. **Migration history** - see `docs/MIGRATION_GUIDE.md` and `docs/AUDIT_SUMMARY.md`
+15. **Test suite available** - Run `pytest -m smoke` for quick validation, `pytest` for full suite
+16. **Cloud training support** - `COLAB_TRAINING.ipynb` enables training on Google Colab Pro
 
 **For new work:** Use the current implementation in root directory. Legacy TF 1.x files are for historical reference only.
 

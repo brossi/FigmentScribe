@@ -15,6 +15,14 @@ ENV/
 # Jupyter Notebook
 .ipynb_checkpoints/
 
+# Testing
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+.pytest_cache/
+.hypothesis/
+
 # TensorFlow/Model files
 saved/
 *.ckpt*

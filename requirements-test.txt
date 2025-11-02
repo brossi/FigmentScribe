@@ -1,0 +1,30 @@
+# Testing dependencies for Scribe handwriting synthesis
+# Install with: pip install -r requirements-test.txt
+
+# Core testing framework
+pytest==7.4.3
+pytest-cov==4.1.0              # Code coverage reporting
+pytest-xdist==3.5.0            # Parallel test execution
+pytest-mock==3.12.0            # Mocking utilities
+pytest-timeout==2.2.0          # Timeout for long-running tests
+pytest-benchmark==4.0.0        # Performance benchmarking
+
+# Property-based testing
+hypothesis==6.92.1             # Generative testing for mathematical properties
+
+# Mocking and test utilities
+responses==0.24.1              # HTTP response mocking (if needed)
+faker==20.1.0                  # Fake data generation
+
+# Code quality tools (optional but recommended)
+black==23.12.1                 # Code formatting
+flake8==7.0.0                  # Linting
+mypy==1.7.1                    # Type checking
+isort==5.13.2                  # Import sorting
+
+# Coverage reporting
+coverage[toml]==7.3.3          # Coverage with TOML configuration support
+
+# TensorFlow testing utilities (already in main requirements.txt)
+# tensorflow==2.15.0
+# numpy==1.26.4
