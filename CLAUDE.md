@@ -44,7 +44,7 @@ python3 train.py \
 
 ### Sampling (Python 3.11 + TensorFlow 2.15 - PRIMARY)
 ```bash
-# Generate handwriting
+# Single-line generation
 python3 sample.py --text "Hello World"
 
 # Control style with bias (higher = neater, lower = messier)
@@ -55,6 +55,26 @@ python3 sample.py --text "Messy handwriting" --bias 0.5
 python3 sample.py
 
 # Output: logs/figures/*.png
+
+# Multi-line generation for documents (NEW!)
+python3 sample.py \
+    --lines "First line of text" \
+            "Second line of text" \
+            "Third line of text" \
+    --format svg
+
+# Per-line bias control for fictional characters
+python3 sample.py \
+    --lines "Character A writes neatly" \
+            "Character B writes messily" \
+            "Character C writes normally" \
+    --biases 1.8 0.6 1.2 \
+    --format svg
+
+# SVG output optimized for pen plotters and gcode conversion
+python3 sample.py --text "For pen plotter" --format svg
+
+# Output SVG: logs/figures/*.svg (ready for vpype, svg2gcode, etc.)
 ```
 
 ### Legacy TensorFlow 1.x (ARCHIVED)
