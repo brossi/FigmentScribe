@@ -111,16 +111,14 @@ class TestModelInstantiation:
             def write(self, msg):
                 pass
 
-        # This will fail if data file doesn't exist, but we're just testing
-        # that the class can be instantiated
-        try:
-            loader = DataLoader(mock_args, logger=MockLogger())
-            # If we get here, DataLoader was instantiated successfully
-            assert loader is not None
-        except FileNotFoundError:
-            # Expected if strokes_training_data.cpkl doesn't exist
-            # Still pass because we verified the class can be instantiated
-            pass
+        # Let this fail if it fails - don't catch and hide errors
+        # The mini_dataset_path fixture should provide valid data
+        loader = DataLoader(mock_args, logger=MockLogger())
+
+        # Verify loader was actually created and has expected attributes
+        assert loader is not None
+        assert hasattr(loader, 'data_chars')
+        assert hasattr(loader, 'data_strokes')
 
 
 @pytest.mark.smoke

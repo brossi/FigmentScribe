@@ -768,3 +768,149 @@ scribe/
 1. Use `character_profiles.py` as template
 2. Combine `--styles` (handwriting appearance) with `--biases` (neatness level)
 3. Output SVG for pen plotter with `--format svg`
+
+---
+
+## Testing Best Practices (CRITICAL)
+
+**⚠️ These rules prevent test manipulation and ensure test integrity.**
+
+### What NOT to Do (Common Test Anti-Patterns)
+
+#### ❌ **1. Don't Create Tests That Always Pass**
+
+```python
+# WRONG - catches exception and passes anyway
+def test_function():
+    try:
+        result = function_that_might_fail()
+        assert result is not None
+    except Exception:
+        pass  # Test "passes" even though it failed - THIS IS DISHONEST
+```
+
+**Why it's wrong:** Test provides false confidence. It shows as "passing" even when functionality is completely broken.
+
+**Correct approach:**
+```python
+# RIGHT - let exceptions propagate naturally
+def test_function():
+    result = function_that_might_fail()  # Will fail test if exception raised
+    assert result is not None
+    assert result.expected_attribute exists  # Validate actual behavior
+```
+
+#### ❌ **2. Don't Claim Tests Pass Without Running Them**
+
+- **Always execute tests** before marking them complete: `pytest -m smoke -v`
+- If tests fail due to missing dependencies (e.g., TensorFlow), **document that clearly**
+- Never mark tests as "passing" or "complete" based on code review alone
+- If you can't run tests, explicitly state: "Tests created but not executed (requires TensorFlow)"
+
+#### ❌ **3. Don't Use Invalid Test Data Formats**
+
+```python
+# WRONG - model expects one-hot encoding, but we pass random normal
+char_seq = tf.random.normal([batch_size, text_len, alphabet_size])  # Values like -1.2, 0.7, etc.
+
+# RIGHT - generate proper one-hot encoding
+char_indices = tf.random.uniform([batch_size, text_len], maxval=alphabet_size, dtype=tf.int32)
+char_seq = tf.one_hot(char_indices, depth=alphabet_size)  # Proper binary 0/1 encoding
+```
+
+**Why it matters:**
+- Invalid inputs can cause false failures (model breaks on garbage input)
+- Invalid inputs can cause false passes (model tolerates bad input when it shouldn't)
+- Tests don't reflect real-world usage
+
+**Golden rule:** Test data must match production data format exactly.
+
+#### ❌ **4. Don't Write Non-Deterministic Tests**
+
+```python
+# WRONG - random data without seed control
+def test_model(model):
+    inputs = tf.random.normal([10, 5])  # Different every run
+    outputs = model(inputs)
+    assert outputs.shape == (10, 3)  # Might pass sometimes, fail others
+```
+
+**Why it's wrong:** Flaky tests are worse than no tests. Can't reproduce failures, can't debug issues.
+
+**Correct approach:**
+```python
+# RIGHT - use fixtures with deterministic seeds
+def test_model(model, reset_random_seeds):  # Fixture sets seed=42
+    inputs = tf.random.normal([10, 5])  # Same values every run
+    outputs = model(inputs)
+    assert outputs.shape == (10, 3)  # Consistent behavior
+```
+
+#### ❌ **5. Don't Test Only "Doesn't Crash"**
+
+```python
+# INSUFFICIENT - only tests that code runs
+def test_attention_mechanism(model, inputs):
+    outputs = model(inputs)
+    assert outputs is not None  # Weak assertion
+```
+
+**Correct approach - verify behavior:**
+```python
+# BETTER - test mathematical properties
+def test_attention_mechanism(model, inputs):
+    outputs = model(inputs)
+
+    # Verify attention weights sum to 1 (mathematical invariant)
+    attention_weights = outputs['attention']
+    weight_sums = tf.reduce_sum(attention_weights, axis=-1)
+    tf.debugging.assert_near(weight_sums, tf.ones_like(weight_sums), atol=1e-5)
+
+    # Verify kappa increases monotonically (attention moves forward)
+    kappa = outputs['kappa']
+    assert tf.reduce_all(kappa[1:] >= kappa[:-1])
+```
+
+### What TO Do (Testing Best Practices)
+
+✅ **Let tests fail naturally** - Don't catch exceptions unless testing error handling
+✅ **Use realistic test data** - Match production formats and constraints exactly
+✅ **Verify correctness** - Test behavior and mathematical properties, not just execution
+✅ **Be deterministic** - Same inputs → same outputs, every single run
+✅ **Run tests before claiming success** - `pytest -m smoke` is mandatory before marking complete
+✅ **Validate actual behavior** - Check outputs, state changes, side effects
+
+### If You Can't Run Tests
+
+**Document clearly:**
+```
+Status: Tests created but NOT EXECUTED
+Reason: TensorFlow not installed in current environment
+Validation needed: User must run `pytest -m smoke` to verify tests pass
+Instructions: pip install -r requirements.txt && pytest -m smoke -v
+```
+
+**Never claim tests "pass" if you haven't run them.**
+
+### Red Flags Indicating Test Manipulation
+
+- `try/except` blocks that pass on exception (unless explicitly testing error handling)
+- Assertions like `assert True` or `assert x is not None` without actual validation
+- Random data without deterministic seeds (`reset_random_seeds` fixture)
+- Tests that never call the function being tested (always pass)
+- Hardcoded expected values that suspiciously match fixture values
+- Comments like "this test might fail but that's okay" - **NO, it's NOT okay**
+
+### Testing Checklist
+
+Before committing tests, verify:
+- [ ] All tests actually run successfully (`pytest -m smoke -v`)
+- [ ] No try/except blocks that hide failures
+- [ ] Test data matches production formats (e.g., one-hot encoding)
+- [ ] Random data uses deterministic seeds
+- [ ] Tests verify behavior, not just "doesn't crash"
+- [ ] Mathematical properties validated where applicable
+- [ ] Edge cases and error conditions tested
+- [ ] Tests would fail if implementation breaks
+
+**Remember:** The goal of tests is to **catch bugs**, not to achieve 100% passing tests. A test that always passes is worse than no test at all.

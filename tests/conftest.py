@@ -133,21 +133,35 @@ def sample_text_full():
 
 
 @pytest.fixture
-def sample_batch_inputs(mock_args):
+def sample_batch_inputs(mock_args, reset_random_seeds):
     """
-    Generate random batch inputs for model testing.
+    Generate properly formatted batch inputs for model testing.
 
     Returns:
         Dictionary with 'stroke_data' and 'char_seq' tensors
+
+    Note: Uses reset_random_seeds for deterministic behavior.
+    char_seq is properly one-hot encoded (not random normal distribution).
     """
     batch_size = mock_args.batch_size
     tsteps = mock_args.tsteps
     text_len = 5
     alphabet_size = len(mock_args.alphabet) + 1
 
+    # Generate random character indices
+    char_indices = tf.random.uniform(
+        [batch_size, text_len],
+        minval=0,
+        maxval=alphabet_size,
+        dtype=tf.int32
+    )
+
+    # Convert to proper one-hot encoding
+    char_seq = tf.one_hot(char_indices, depth=alphabet_size)
+
     return {
         'stroke_data': tf.random.normal([batch_size, tsteps, 3]),
-        'char_seq': tf.random.normal([batch_size, text_len, alphabet_size]),
+        'char_seq': char_seq,  # Properly one-hot encoded
     }
 
 
