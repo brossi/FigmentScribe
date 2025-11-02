@@ -131,8 +131,18 @@ STROKE → LSTM1 ← [Window + Stroke]
 
 **sample.py** - Sampling/generation script
 - Eager execution sampling loop
+- Multi-line text generation support
 - Bias control for randomness (0.5=messy, 2.0=neat)
-- Generates PNG images in `logs/figures/`
+- Per-line bias control for character-specific handwriting
+- Generates PNG or SVG output in `logs/figures/`
+
+**svg_output.py** - SVG generation module (for pen plotters)
+- Ported from sjvasquez/handwriting-synthesis
+- `offsets_to_coords()`: Convert delta encoding to absolute coordinates
+- `denoise()`: Savitzky-Golay smoothing filter
+- `align()`: Rotation correction for handwriting slant
+- `save_as_svg()`: Generate plotter-ready SVG files
+- Optimized for gcode conversion (clean paths, M/L commands)
 
 **utils.py** - Data loading and preprocessing (shared)
 - DataLoader class: IAM dataset handling (11,916 samples)
@@ -142,6 +152,12 @@ STROKE → LSTM1 ← [Window + Stroke]
 **verify_data.py** - Data integrity verification
 - Validates preprocessed training data
 - Checks for 11,916 samples in correct format
+
+**character_profiles.py** - Character handwriting profile templates
+- Pre-built character personalities with bias settings
+- BIAS_GUIDE for standardized neatness levels
+- Helper functions for multi-character document generation
+- Example usage for fictional character handwriting
 
 ### Legacy Components (TensorFlow 1.x - ARCHIVED)
 
@@ -431,8 +447,10 @@ scribe/
 ├── model.py              # Neural network architecture (Keras API)
 ├── train.py              # Training script
 ├── sample.py             # Sampling/generation script
+├── svg_output.py         # SVG generation for pen plotters (NEW)
 ├── utils.py              # Data loading (IAM format)
 ├── verify_data.py        # Data integrity checker
+├── character_profiles.py # Character handwriting templates (NEW)
 │
 ├── dataloader.ipynb      # Data exploration notebook
 ├── sample.ipynb          # Sampling walkthrough notebook
@@ -458,8 +476,9 @@ scribe/
 │
 ├── saved/                # Model checkpoints (created during training)
 ├── logs/                 # Training logs and generated figures
+│   └── figures/          # PNG and SVG output (generated)
 ├── static/               # Sample output images
-├── requirements.txt      # Python 3.11 + TensorFlow 2.15 dependencies
+├── requirements.txt      # Python 3.11 + TensorFlow 2.15 + scipy + svgwrite
 ├── README.md             # Project overview
 └── CLAUDE.md             # This file
 ```
