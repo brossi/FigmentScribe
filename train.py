@@ -180,8 +180,8 @@ def main():
     parser.add_argument('--kmixtures', type=int, default=1,
                        help='Number of Gaussian mixtures in attention')
     parser.add_argument('--alphabet', type=str,
-                       default=' abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
-                       help='Alphabet for character encoding')
+                       default=' abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!"#%&\'()*+,-./:;?[]',
+                       help='Alphabet for character encoding (83 chars: letters, numerals, punctuation from IAM dataset)')
     parser.add_argument('--tsteps_per_ascii', type=int, default=25,
                        help='Approximate pen points per character')
 

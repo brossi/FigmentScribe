@@ -26,10 +26,11 @@ python3 verify_data.py
 
 ### Training (Python 3.11 + TensorFlow 2.15 - PRIMARY)
 ```bash
-# Basic training
+# Basic training (rnn_size=100, no style priming support)
 python3 train.py
 
-# High-quality training (recommended)
+# High-quality training with style priming support (REQUIRED for --styles)
+# NOTE: Style priming REQUIRES rnn_size=400 (styles trained with this size)
 python3 train.py --rnn_size 400 --nmixtures 20 --nepochs 250
 
 # Custom configuration
@@ -51,6 +52,9 @@ python3 sample.py --text "Hello World"
 python3 sample.py --text "Neat handwriting" --bias 2.0
 python3 sample.py --text "Messy handwriting" --bias 0.5
 
+# Full character set: letters, numerals, punctuation
+python3 sample.py --text "Meet me at 3:00pm on July 15th, 1985!"
+
 # Generate default test strings
 python3 sample.py
 
@@ -68,6 +72,24 @@ python3 sample.py \
     --lines "Character A writes neatly" \
             "Character B writes messily" \
             "Character C writes normally" \
+    --biases 1.8 0.6 1.2 \
+    --format svg
+
+# Style priming for distinct handwriting (13 styles: 0-12)
+# REQUIREMENT: Model must be trained with --rnn_size 400 for style priming
+python3 sample.py \
+    --lines "This uses style 0" \
+            "This uses style 5" \
+            "This uses style 12" \
+    --styles 0 5 12 \
+    --format svg
+
+# Combined: different styles AND different neatness
+python3 sample.py \
+    --lines "Character A: neat style 3" \
+            "Character B: messy style 7" \
+            "Character C: normal style 11" \
+    --styles 3 7 11 \
     --biases 1.8 0.6 1.2 \
     --format svg
 
@@ -134,6 +156,13 @@ STROKE → LSTM1 ← [Window + Stroke]
 - Multi-line text generation support
 - Bias control for randomness (0.5=messy, 2.0=neat)
 - Per-line bias control for character-specific handwriting
+- **Style priming**: 13 pre-trained handwriting styles (0-12, requires rnn_size=400)
+- `load_style_state()`: Loads style examples and extracts LSTM states
+  - Validates model has rnn_size=400 (fails early with clear error)
+  - Caches loaded styles to avoid redundant computation
+  - Comprehensive error handling for missing files, invalid characters, etc.
+- `sample()`: Accepts `initial_states` for style-primed generation
+- `sample_multiline()`: Per-line style and bias control
 - Generates PNG or SVG output in `logs/figures/`
 
 **svg_output.py** - SVG generation module (for pen plotters)
@@ -209,6 +238,36 @@ sigma1, sigma2: [batch, nmixtures]  # Standard deviations
 rho: [batch, nmixtures]      # Correlation [-1, 1]
 ```
 
+### Style Files Format: `data/styles/style-{0-12}-{chars,strokes}.npy`
+```python
+# Each style has two files (13 styles total: 0-12)
+# Example: style-0-chars.npy, style-0-strokes.npy
+
+# chars file: Scalar numpy array containing bytes string
+chars = np.load('style-0-chars.npy', allow_pickle=True)
+text = chars.item().decode('utf-8')  # e.g., "thought that vengeance"
+
+# strokes file: Array of shape (n_points, 3)
+strokes = np.load('style-0-strokes.npy')
+strokes.shape  # e.g., (631, 3) - [Δx, Δy, eos]
+strokes.dtype  # float32
+
+# Style priming process:
+# 1. Load style chars and strokes
+# 2. Run strokes through model to get final LSTM states
+# 3. Use those states as initial_states for new text generation
+# 4. New text continues in the same handwriting style
+```
+
+**Key Points:**
+- **13 pre-trained styles** ported from sjvasquez/handwriting-synthesis
+- **Chars file**: Scalar array with bytes string (decode with `.item().decode('utf-8')`)
+- **Strokes file**: Delta-encoded handwriting sample
+- **Style priming**: Extracts LSTM hidden states to maintain consistent handwriting
+- **⚠️ CRITICAL**: Styles require rnn_size=400 (NOT compatible with default rnn_size=100)
+  - `load_style_state()` validates model size and fails with clear error if mismatch
+  - Must train model with `--rnn_size 400` to use style priming
+
 ---
 
 ## Critical Implementation Details
@@ -279,7 +338,7 @@ absolute_coords = np.cumsum(strokes[:, :2], axis=0)
 
 ## Migration Status
 
-### ✅ ALL PHASES COMPLETE - PRODUCTION READY
+### ✅ ALL PHASES COMPLETE (0-4) - PRODUCTION READY
 
 ### Phase 0: Data Verification ✅ COMPLETE
 - **11,916 training samples** verified in `strokes_training_data.cpkl`
@@ -308,6 +367,72 @@ absolute_coords = np.cumsum(strokes[:, :2], axis=0)
 - `tf.train.Saver` → `tf.train.Checkpoint`
 
 **See:** `docs/MIGRATION_GUIDE.md` for complete migration documentation
+
+### Phase 3: Multi-line SVG Features ✅ COMPLETE
+**sjvasquez handwriting-synthesis port for pen plotter output**
+
+**Features implemented:**
+- `svg_output.py`: SVG generation module (ported from sjvasquez)
+  - `offsets_to_coords()`: Delta to absolute coordinate conversion
+  - `denoise()`: Savitzky-Golay smoothing (window=7, poly=3)
+  - `align()`: Rotation correction using linear regression
+  - `save_as_svg()`: Multi-line SVG generation for pen plotters
+- Multi-line text generation in `sample.py`
+  - `sample_multiline()`: Process multiple lines with independent parameters
+  - `--lines` argument: Multiple text strings
+  - `--biases` argument: Per-line bias control
+  - `--format svg`: SVG output for gcode conversion
+- `character_profiles.py`: Character handwriting template system
+
+**Commits:**
+- c5a1fa3: Add multi-line SVG handwriting generation for pen plotter
+- fc5bc68: Add documentation and character profile templates
+- 991cf87: Fix documentation gaps in CLAUDE.md
+
+### Phase 4: Style Priming System ✅ COMPLETE
+**13 handwriting styles for character-specific generation**
+
+**⚠️ CRITICAL REQUIREMENT: Model MUST be trained with `--rnn_size 400` to use style priming**
+
+**Features implemented:**
+- **Expanded alphabet** from 54 to 83 characters
+  - Added numerals (0-9) and punctuation (!"#%&'()*+,-./:;?[])
+  - Enables realistic fictional character letters with dates, emphasis, quotations
+  - Matches full IAM dataset character set
+- 13 pre-trained styles ported from sjvasquez (styles 0-12)
+  - 26 `.npy` files in `data/styles/` (chars + strokes for each style)
+- `load_style_state()` function in `sample.py`
+  - Loads style sample text and strokes
+  - Runs through model to extract LSTM hidden states
+  - Returns initial states for style-primed generation
+  - **Validates model has rnn_size=400** (fails with clear error otherwise)
+  - **Caches loaded styles** to avoid redundant computation
+- `sample()` updated to accept `initial_states` parameter
+- `sample_multiline()` updated for per-line style control
+- `--styles` CLI argument: List of style IDs (0-12) for each line
+- Comprehensive error handling and validation
+
+**Usage examples:**
+```bash
+# First, ensure you have a model trained with rnn_size=400:
+python3 train.py --rnn_size 400 --nmixtures 20 --nepochs 250
+
+# Then use styles:
+python3 sample.py --lines "Text in style 5" --styles 5 --format svg
+
+# Multiple styles (fictional characters)
+python3 sample.py \
+    --lines "Character A" "Character B" "Character C" \
+    --styles 3 7 11 \
+    --biases 1.8 0.6 1.2 \
+    --format svg
+```
+
+**Why rnn_size=400 is required:**
+- Style files contain LSTM states trained with rnn_size=400
+- State shape must match: `[3 layers, 2 states, batch, 400 units]`
+- Using different sizes causes TensorFlow shape mismatch errors
+- Function validates size and provides clear error message if mismatch detected
 
 ---
 
@@ -464,7 +589,13 @@ scribe/
 │
 ├── data/
 │   ├── strokes_training_data.cpkl  # 11,916 samples (44 MB)
-│   └── styles.p                     # 5 style vectors (134 KB)
+│   ├── styles.p                     # 5 legacy style vectors (134 KB, unused)
+│   └── styles/                      # 13 handwriting styles (NEW)
+│       ├── style-0-chars.npy        # Style 0 text sample
+│       ├── style-0-strokes.npy      # Style 0 stroke data
+│       ├── ...                      # Styles 1-11
+│       ├── style-12-chars.npy       # Style 12 text sample
+│       └── style-12-strokes.npy     # Style 12 stroke data
 │
 ├── docs/
 │   ├── MIGRATION_GUIDE.md    # Complete migration documentation ⭐
@@ -491,7 +622,7 @@ scribe/
 - `rnn_size`: 100 (or 400 for quality)
 - `nmixtures`: 8 (or 20 for quality)
 - `kmixtures`: 1 (attention heads)
-- `alphabet`: ` abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ`
+- `alphabet`: ` abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!"#%&'()*+,-./:;?[]` (83 chars: letters, numerals, punctuation)
 
 ### Training Hyperparameters
 - `batch_size`: 32
@@ -527,15 +658,24 @@ scribe/
 
 ## Important Notes for Future Claude Instances
 
-1. **✅ Migration COMPLETE** - This is now Python 3.11 + TensorFlow 2.15 (production ready)
+1. **✅ ALL PHASES COMPLETE (0-4)** - Python 3.11 + TensorFlow 2.15 with multi-line SVG and style priming
 2. **Use current files** - `model.py`, `train.py`, `sample.py` are the production implementation
 3. **Legacy files archived** - TF 1.x implementation in `legacy_tf1/` for reference only
 4. **Data is ready** - 11,916 samples verified, no IAM download needed
-5. **Attention mechanism** is the most complex component - see `model.py`
-6. **MDN output** is second most complex - focus on parameter transformations
-7. **Delta encoding is critical** - all strokes are displacements, not absolute positions
-8. **Style priming is unreliable** - noted limitation in original implementation
-9. **Eager execution** - Uses no sessions, no placeholders, direct function calls
-10. **Migration history** - see `docs/MIGRATION_GUIDE.md` and `docs/AUDIT_SUMMARY.md`
+5. **Full character set** - 83 chars including numerals and punctuation (letters, 0-9, !"#%&'()*+,-./:;?[])
+6. **13 handwriting styles available** - Use `--styles 0-12` for character-specific generation (REQUIRES rnn_size=400)
+7. **Attention mechanism** is the most complex component - see `model.py`
+8. **MDN output** is second most complex - focus on parameter transformations
+9. **Delta encoding is critical** - all strokes are displacements, not absolute positions
+10. **Style priming implemented** - `load_style_state()` extracts LSTM states from style samples
+11. **SVG output for pen plotters** - `svg_output.py` generates gcode-ready files
+12. **Multi-line generation** - `sample_multiline()` with per-line bias and style control
+13. **Eager execution** - Uses no sessions, no placeholders, direct function calls
+14. **Migration history** - see `docs/MIGRATION_GUIDE.md` and `docs/AUDIT_SUMMARY.md`
 
 **For new work:** Use the current implementation in root directory. Legacy TF 1.x files are for historical reference only.
+
+**For fictional character handwriting:**
+1. Use `character_profiles.py` as template
+2. Combine `--styles` (handwriting appearance) with `--biases` (neatness level)
+3. Output SVG for pen plotter with `--format svg`

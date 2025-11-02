@@ -31,6 +31,9 @@ IAM_TrOCR-dataset/
 lineStrokes/
 ascii/
 
+# External repositories (cloned for reference, not part of project)
+handwriting-synthesis/
+
 # Backup files
 *.tar.gz
 *.zip

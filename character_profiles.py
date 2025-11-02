@@ -21,7 +21,7 @@ CHARACTERS = {
         'style': 9,  # For future style priming implementation
         'description': 'Neat, precise handwriting - military background',
         'personality': 'Disciplined, formal, meticulous',
-        'sample_text': 'The mission parameters are clearly defined.'
+        'sample_text': 'Report due by 09:00 on March 15th, 1985.'
     },
 
     'character_b': {
@@ -30,7 +30,7 @@ CHARACTERS = {
         'style': 12,
         'description': 'Messy, emotional handwriting - artist/creative type',
         'personality': 'Impulsive, passionate, expressive',
-        'sample_text': 'cant believe what happened today!!!'
+        'sample_text': "Can't believe it - met him at 3:00pm!"
     },
 
     'character_c': {
@@ -39,7 +39,7 @@ CHARACTERS = {
         'style': 7,
         'description': 'Balanced, natural handwriting - everyday person',
         'personality': 'Practical, straightforward, reliable',
-        'sample_text': 'Just wanted to let you know I got your message.'
+        'sample_text': 'Got your message (thanks!) - call me at 555-0123.'
     },
 }
 
@@ -113,9 +113,9 @@ if __name__ == '__main__':
     print("=" * 70)
 
     document = [
-        ('character_a', 'The operation will commence at 0600 hours.'),
-        ('character_b', 'This is so exciting I can hardly wait!'),
-        ('character_c', 'Understood. I will be ready.'),
+        ('character_a', 'Meeting scheduled: June 12th, 1985 at 14:00.'),
+        ('character_b', "Can't make it - how about 3:30pm instead?!"),
+        ('character_c', 'Works for me. See you then (bring notes).'),
     ]
 
     print("\nCharacter profiles:")
