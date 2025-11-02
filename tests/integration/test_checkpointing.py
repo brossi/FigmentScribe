@@ -301,19 +301,19 @@ class TestResumeTraining:
 class TestCheckpointCompatibility:
     """Test checkpoint compatibility and edge cases."""
 
-    def test_checkpoint_with_different_model_fails(self, tiny_model,
-                                                   temp_checkpoint_dir,
-                                                   reset_random_seeds):
-        """Test loading checkpoint with wrong model architecture fails gracefully."""
+    def test_checkpoint_with_different_model_partial_restore(self, tiny_model,
+                                                             temp_checkpoint_dir,
+                                                             reset_random_seeds):
+        """Test loading checkpoint with wrong model architecture allows partial restore."""
         # Save checkpoint
         checkpoint = tf.train.Checkpoint(model=tiny_model)
         save_path = checkpoint.save(os.path.join(temp_checkpoint_dir, 'model'))
 
-        # Try to load into model with different size (should fail or warn)
+        # Create model with different architecture
         from model import HandwritingModel
 
         class DifferentArgs:
-            rnn_size = 20  # Different size
+            rnn_size = 20  # Different size (tiny_model has 10)
             nmixtures = 2
             kmixtures = 1
             alphabet = ' abc'
@@ -324,15 +324,13 @@ class TestCheckpointCompatibility:
 
         new_checkpoint = tf.train.Checkpoint(model=different_model)
 
-        # Restore should fail or produce warnings
-        # (TensorFlow might allow partial restore)
-        try:
-            status = new_checkpoint.restore(save_path)
-            # If restore succeeds, check status
-            # Some variables might not match
-        except Exception:
-            # Expected to fail with incompatible architecture
-            pass
+        # TensorFlow allows partial restore with warnings (doesn't raise exception)
+        # Restore completes but some variables may not match
+        status = new_checkpoint.restore(save_path)
+
+        # Verify restore operation completed (checkpoint path recognized)
+        assert status.checkpoint_path is not None, \
+            "Restore should complete even with architecture mismatch"
 
     def test_checkpoint_directory_created(self, tiny_model):
         """Test checkpoint creates directory if it doesn't exist."""
