@@ -324,6 +324,52 @@ jupyter notebook
 
 ---
 
+## ☁️ Cloud Training on Google Colab Pro
+
+Don't have a local GPU? Train your model on Google Colab Pro with GPU acceleration.
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com)
+
+### Quick Start
+
+1. **Upload to Google Drive**: Copy the entire `scribe` folder to your Google Drive root
+2. **Open notebook**: Open `COLAB_TRAINING.ipynb` in Google Colab
+3. **Enable GPU**: Runtime → Change runtime type → GPU
+4. **Run cells**: Execute cells 1-6 in order to start training
+
+### What You Need
+
+- **Google Colab Pro subscription**: $10/month for GPU access
+- **Google Drive space**: ~15 GB for data and checkpoints
+- **Training time**: 3-6 hours for full training (rnn_size=400, 250 epochs)
+
+### Cost Estimate
+
+**Compute Units (CU) usage:**
+- T4 GPU: ~18 CU for full training (~$0.80 beyond subscription)
+- V100 GPU: ~21 CU for full training (~$1.10 beyond subscription)
+- Total cost: ~$10-12 for one full training run
+
+### Features
+
+✅ **Auto-resume from checkpoints** - Training continues if session disconnects
+✅ **Pre-configured environment** - TensorFlow 2.15 installed automatically
+✅ **Google Drive persistence** - All outputs saved across sessions
+✅ **GPU optimization** - Memory growth enabled to prevent OOM errors
+
+### Documentation
+
+Complete setup guide with troubleshooting: **[docs/COLAB_SETUP.md](docs/COLAB_SETUP.md)**
+
+**Topics covered:**
+- Detailed setup instructions
+- Session management and reconnection
+- Monitoring training progress
+- Cost optimization strategies
+- Common errors and solutions
+
+---
+
 ## 🔧 Troubleshooting
 
 ### TensorFlow not found

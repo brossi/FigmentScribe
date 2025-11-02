@@ -43,6 +43,38 @@ python3 train.py \
     --save_path saved/model
 ```
 
+### Cloud Training on Google Colab Pro (NEW!)
+```bash
+# For users without local GPU - train on Google Colab Pro with GPU acceleration
+# See: COLAB_TRAINING.ipynb and docs/COLAB_SETUP.md
+
+# 1. Upload scribe/ folder to Google Drive root
+# 2. Open COLAB_TRAINING.ipynb in Google Colab
+# 3. Runtime → Change runtime type → GPU
+# 4. Execute cells 1-6 in order
+
+# Training runs on Colab with these paths:
+PROJECT_DIR=/content/drive/MyDrive/scribe
+DATA_DIR=/content/drive/MyDrive/scribe/data
+SAVED_DIR=/content/drive/MyDrive/scribe/saved
+
+# Training command (automatically configured in notebook):
+python train.py \
+    --rnn_size 400 \
+    --nmixtures 20 \
+    --nepochs 250 \
+    --batch_size 32 \
+    --learning_rate 1e-4 \
+    --save_every 250 \
+    --data_dir ${DATA_DIR} \
+    --save_path ${SAVED_DIR}/model \
+    --log_dir ${LOGS_DIR}
+
+# Expected: 3-6 hours on T4/V100 GPU
+# Auto-resume: If session disconnects, re-run training cell (resumes from checkpoint)
+# Cost: ~$10-12 total (Colab Pro $10 subscription + ~$1-2 compute units)
+```
+
 ### Sampling (Python 3.11 + TensorFlow 2.15 - PRIMARY)
 ```bash
 # Single-line generation
@@ -579,6 +611,7 @@ scribe/
 │
 ├── dataloader.ipynb      # Data exploration notebook
 ├── sample.ipynb          # Sampling walkthrough notebook
+├── COLAB_TRAINING.ipynb  # Google Colab Pro training notebook (NEW)
 │
 ├── legacy_tf1/           # ← TensorFlow 1.x implementation (ARCHIVED)
 │   ├── model.py          #    Original TF 1.x model
@@ -599,6 +632,7 @@ scribe/
 │
 ├── docs/
 │   ├── MIGRATION_GUIDE.md    # Complete migration documentation ⭐
+│   ├── COLAB_SETUP.md        # Google Colab Pro training setup guide (NEW)
 │   ├── AUDIT_SUMMARY.md      # Code audit results
 │   ├── README.md             # Documentation index
 │   └── archive/              # ← Historical documentation
