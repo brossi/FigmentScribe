@@ -57,3 +57,4 @@ archive.zip
 # OS
 .DS_Store
 Thumbs.db
+scribe_web/outputs/

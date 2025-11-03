@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}Generate Handwriting - Scribe{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h1><i class="bi bi-pen-fill"></i> Handwriting Generator</h1>
+            <p class="lead text-muted">
+                Generate realistic handwritten text using neural networks
+            </p>
+        </div>
+    </div>
+
+    <!-- Main Form -->
+    <div class="row">
+        <!-- Input Panel -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-keyboard"></i> Input Text
+                    </h5>
+
+                    <form id="generate-form">
+                        <!-- Text Input -->
+                        <div class="mb-3">
+                            <label for="text-input" class="form-label">
+                                Text to generate <span class="text-muted">(multi-line supported)</span>
+                            </label>
+                            <textarea
+                                class="form-control"
+                                id="text-input"
+                                name="text"
+                                rows="6"
+                                placeholder="Enter your text here...&#10;You can use multiple lines!&#10;Each line will be rendered separately."
+                                required
+                            >Meet me at the coffee shop at 3:00pm.
+I have something important to tell you.
+Don't forget to bring the documents!</textarea>
+                            <div class="form-text">
+                                <span id="line-count">3</span> line(s),
+                                <span id="char-count">139</span> character(s)
+                            </div>
+                        </div>
+
+                        <!-- Style Selector -->
+                        <div class="mb-3">
+                            <label for="style-select" class="form-label">
+                                <i class="bi bi-palette"></i> Handwriting Style
+                            </label>
+                            <select class="form-select" id="style-select" name="style">
+                                {% for style in styles %}
+                                <option value="{{ style.id }}" {% if style.id == 0 %}selected{% endif %}>
+                                    {{ style.name }} - {{ style.description }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">
+                                Choose from 13 pre-trained handwriting styles
+                            </div>
+                        </div>
+
+                        <!-- Bias Slider -->
+                        <div class="mb-3">
+                            <label for="bias-slider" class="form-label">
+                                <i class="bi bi-sliders"></i> Neatness Control
+                                <span class="badge bg-secondary" id="bias-value">1.0</span>
+                            </label>
+                            <input
+                                type="range"
+                                class="form-range"
+                                id="bias-slider"
+                                name="bias"
+                                min="0.5"
+                                max="2.0"
+                                step="0.1"
+                                value="1.0"
+                            >
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted small">
+                                    <i class="bi bi-shuffle"></i> Messy (0.5)
+                                </span>
+                                <span class="text-muted small">
+                                    <i class="bi bi-check-circle"></i> Neat (2.0)
+                                </span>
+                            </div>
+                            <div class="form-text">
+                                Lower values = more variation, Higher values = neater writing
+                            </div>
+                        </div>
+
+                        <!-- Format Selection -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="bi bi-file-earmark-image"></i> Output Format
+                            </label>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="format" id="format-png" value="png" checked>
+                                <label class="btn btn-outline-primary" for="format-png">
+                                    <i class="bi bi-image"></i> PNG
+                                </label>
+
+                                <input type="radio" class="btn-check" name="format" id="format-svg" value="svg">
+                                <label class="btn btn-outline-primary" for="format-svg">
+                                    <i class="bi bi-vector-pen"></i> SVG
+                                </label>
+                            </div>
+                            <div class="form-text">
+                                PNG for images, SVG for pen plotters
+                            </div>
+                        </div>
+
+                        <!-- Generate Button -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg" id="generate-btn">
+                                <i class="bi bi-stars"></i> Generate Handwriting
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Info Card -->
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h6 class="card-title"><i class="bi bi-info-circle"></i> Tips</h6>
+                    <ul class="mb-0 small">
+                        <li>Use lowercase and uppercase letters, numbers, and basic punctuation</li>
+                        <li>Each line generates independently with the same style</li>
+                        <li>Lower bias = more artistic variation</li>
+                        <li>Higher bias = cleaner, more legible writing</li>
+                        <li>SVG format is ideal for pen plotters and gcode conversion</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Output Panel -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-image"></i> Generated Output
+                    </h5>
+
+                    <!-- Loading State -->
+                    <div id="loading-state" class="text-center py-5" style="display: none;">
+                        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                            <span class="visually-hidden">Generating...</span>
+                        </div>
+                        <p class="mt-3 text-muted">Generating handwriting...</p>
+                        <p class="small text-muted">This may take 5-15 seconds</p>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="empty-state" class="text-center py-5">
+                        <i class="bi bi-pen display-1 text-muted"></i>
+                        <p class="mt-3 text-muted">
+                            Enter text and click "Generate" to see your handwritten output
+                        </p>
+                    </div>
+
+                    <!-- Output State -->
+                    <div id="output-state" style="display: none;">
+                        <!-- Generated Image -->
+                        <div class="mb-3">
+                            <img id="output-image" src="" alt="Generated handwriting" class="img-fluid border rounded">
+                        </div>
+
+                        <!-- Generation Info -->
+                        <div class="alert alert-success" id="generation-info">
+                            <i class="bi bi-check-circle"></i>
+                            Generated in <strong id="generation-time">0</strong> seconds
+                        </div>
+
+                        <!-- Download Buttons -->
+                        <div class="d-grid gap-2">
+                            <a href="#" id="download-png-btn" class="btn btn-primary" download>
+                                <i class="bi bi-download"></i> Download PNG
+                            </a>
+                            <a href="#" id="download-svg-btn" class="btn btn-outline-primary" download>
+                                <i class="bi bi-download"></i> Download SVG
+                            </a>
+                        </div>
+
+                        <!-- Generate Again Button -->
+                        <div class="d-grid gap-2 mt-2">
+                            <button type="button" class="btn btn-outline-secondary" id="generate-again-btn">
+                                <i class="bi bi-arrow-repeat"></i> Generate Again
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Error State -->
+                    <div id="error-state" class="alert alert-danger" style="display: none;">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <strong>Error:</strong> <span id="error-message"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Initialize on page load
+$(document).ready(function() {
+    // Update line and character count
+    function updateCounts() {
+        const text = $('#text-input').val();
+        const lines = text.split('\n').filter(line => line.trim().length > 0);
+        const chars = text.length;
+
+        $('#line-count').text(lines.length);
+        $('#char-count').text(chars);
+    }
+
+    // Update bias value display
+    function updateBiasValue() {
+        const bias = $('#bias-slider').val();
+        $('#bias-value').text(bias);
+    }
+
+    // Event listeners
+    $('#text-input').on('input', updateCounts);
+    $('#bias-slider').on('input', updateBiasValue);
+
+    // Initialize counts
+    updateCounts();
+    updateBiasValue();
+});
+</script>
+{% endblock %}
