@@ -57,3 +57,6 @@ archive.zip
 # OS
 .DS_Store
 Thumbs.db
+reference-repos/handwriting-model/
+reference-repos/Handwriting-synthesis/
+reference-repos/pytorch-handwriting-synthesis-toolkit/
