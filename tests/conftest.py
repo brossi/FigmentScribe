@@ -41,7 +41,9 @@ class MockArgs:
         self.nmixtures = kwargs.get('nmixtures', 2)
         self.kmixtures = kwargs.get('kmixtures', 1)
         self.alphabet = kwargs.get('alphabet', ' abcdefghijklmnopqrstuvwxyz')
-        self.tsteps_per_ascii = kwargs.get('tsteps_per_ascii', 25)
+        # CRITICAL: Must be ≤ tsteps to ensure ascii_steps = tsteps // tsteps_per_ascii ≥ 1
+        # Otherwise DataLoader creates empty char_seq tensors
+        self.tsteps_per_ascii = kwargs.get('tsteps_per_ascii', 5)
 
         # Training parameters
         self.batch_size = kwargs.get('batch_size', 4)
