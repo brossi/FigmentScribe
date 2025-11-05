@@ -82,15 +82,23 @@ python3 sample.py --text "Neat handwriting" --bias 2.0
 
 ### 3. Train Your Own Model (Optional)
 
+**⚡ Quick Test (M1 Mac - 30 minutes)**
 ```bash
-# Quick training (smaller model)
-python3 train.py --rnn_size 100 --nmixtures 8 --nepochs 50
-
-# High-quality training (recommended)
-python3 train.py --rnn_size 400 --nmixtures 20 --nepochs 250
+python3 train.py --rnn_size 100 --nmixtures 8 --nepochs 10 --nbatches 50
 ```
 
-**Training time**: ~12-24 hours on GPU for full training
+**🍎 M1 Local Training (9 hours, good quality)**
+```bash
+python3 train.py --rnn_size 400 --nmixtures 20 --nepochs 30 --nbatches 100
+```
+
+**☁️ Cloud/Server Training (3-6 hours on GPU, best quality)**
+```bash
+python3 train.py --rnn_size 400 --nmixtures 20 --nepochs 250
+# Use Google Colab Pro or cloud GPU for this
+```
+
+**⚠️ Note**: Default settings (`--nbatches 500`) create 125,000 training batches which takes **16+ days** on M1! Use the recommended M1 settings above for reasonable training times.
 
 ---
 
@@ -133,6 +141,16 @@ chmod +x scripts/setup-m1.sh
 - Troubleshooting common issues
 - Performance optimization tips
 - Development workflow recommendations
+
+**M1 Training Recommendations** 🎯:
+```bash
+# Quick test (30 min) - verify everything works
+python3 train.py --rnn_size 100 --nmixtures 8 --nepochs 10 --nbatches 50
+
+# Production training (9 hours) - good quality for local use
+python3 train.py --rnn_size 400 --nmixtures 20 --nepochs 30 --nbatches 100
+```
+**Avoid default `--nbatches 500`** (creates 125K batches = 16+ days on M1)
 
 ---
 
@@ -304,11 +322,13 @@ scribe/
 
 ### Model Size
 
-| `rnn_size` | Quality | Training Time | Memory | Use Case |
-|------------|---------|---------------|--------|----------|
-| 100 | Good | ~12 hours | ~2 GB | Quick experiments |
-| 400 | Excellent | ~24 hours | ~4 GB | **Recommended** |
-| 900 | Best | ~48 hours | ~8 GB | Maximum quality |
+| `rnn_size` | Quality | Training Time (GPU Server) | Training Time (M1 Mac)* | Memory | Use Case |
+|------------|---------|----------------------------|------------------------|--------|----------|
+| 100 | Good | ~6 hours | ~3 hours | ~2 GB | Quick experiments |
+| 400 | Excellent | ~12 hours | ~9 hours | ~4 GB | **Recommended** |
+| 900 | Best | ~24 hours | ~18 hours | ~8 GB | Maximum quality |
+
+\* *With `--nbatches 100 --nepochs 30`. Default `--nbatches 500` multiplies times by 5×!*
 
 ### Mixture Components
 
