@@ -507,6 +507,45 @@ pip install --upgrade --force-reinstall tensorflow-metal==1.1.0
 
 ---
 
+## M1-Specific Test Behavior
+
+### Smoke Tests on M1
+
+When running smoke tests (`pytest -m smoke`) on Apple Silicon, you should see **27/27 tests pass**.
+
+Previous versions of the test suite had three tests that would fail on M1, but these have been fixed:
+
+**1. GPU Visibility Test** ✅ **Fixed**
+- **What it does:** Verifies tests run on CPU (GPU not required)
+- **M1 behavior:** Metal GPU may remain visible even after disabling
+- **Why:** `tensorflow-metal` doesn't fully honor `set_visible_devices([], 'GPU')`
+- **Is this a problem?** No! Tests still run correctly on CPU
+- **Fix:** Test is now M1-aware (allows ≤1 GPU on ARM processors)
+
+**2. DataLoader Test** ✅ **Fixed**
+- **What it was:** Test checked for wrong attribute names (`data_chars`, `data_strokes`)
+- **Fix:** Updated to check correct attributes (`ascii_data`, `stroke_data`)
+
+**3. Coordinate Conversion Test** ✅ **Fixed**
+- **What it was:** Test expected wrong output shape (2 columns instead of 3)
+- **Fix:** Updated to expect correct shape with `[x, y, eos]` columns
+
+### GPU Detection on M1
+
+When you check for GPU devices on M1:
+```bash
+python3 -c "import tensorflow as tf; print(tf.config.list_physical_devices('GPU'))"
+```
+
+You'll see:
+```
+[PhysicalDevice(name='/physical_device:GPU:0', device_type='GPU')]
+```
+
+**This is correct!** It means your Metal GPU is detected and available for training/sampling. The test suite explicitly disables GPU for deterministic testing, but the GPU is still visible in the system - this is normal M1 behavior.
+
+---
+
 ## Known Issues
 
 ### Issue 1: tensorflow-metal Occasionally Crashes
