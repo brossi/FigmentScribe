@@ -83,12 +83,14 @@ class TestOneHotEncoding:
 
         encoded = to_one_hot(text, max_len, alphabet)
 
-        # Character 'a' should be at index 1 (0 is unknown/padding)
-        # Character 'b' should be at index 2
-        # Character 'c' should be at index 3
-        assert encoded[0, 1] == 1, "Character 'a' should be at index 1"
-        assert encoded[1, 2] == 1, "Character 'b' should be at index 2"
-        assert encoded[2, 3] == 1, "Character 'c' should be at index 3"
+        # to_one_hot uses alphabet.find(char) + 1, so:
+        # 'a' (alphabet index 1) → one-hot index 2
+        # 'b' (alphabet index 2) → one-hot index 3
+        # 'c' (alphabet index 3) → one-hot index 4
+        # Index 0 is reserved for padding/unknown
+        assert encoded[0, 2] == 1, "Character 'a' should be at index 2"
+        assert encoded[1, 3] == 1, "Character 'b' should be at index 3"
+        assert encoded[2, 4] == 1, "Character 'c' should be at index 4"
 
     def test_one_hot_encoding_padding(self):
         """Test short strings are padded with zeros."""
@@ -130,8 +132,8 @@ class TestOneHotEncoding:
         # This is because alphabet.find() returns -1, which becomes 0 after +1
         encoded = to_one_hot(text, max_len, alphabet)
 
-        # First character 'a' is valid
-        assert encoded[0, 1] == 1
+        # First character 'a' is valid (alphabet index 1 → one-hot index 2)
+        assert encoded[0, 2] == 1
 
         # 'x' and 'z' are unknown, should map to index 0
         assert encoded[1, 0] == 1
@@ -205,14 +207,14 @@ class TestDataLoaderInitialization:
 
         loader = DataLoader(mock_args, logger=MockLogger())
 
-        # With 10 samples, should split approximately 9/1 (90/10 due to small size)
-        # Actually uses every 20th sample for validation
+        # With 20 samples, should split 19 train / 1 validation
+        # DataLoader uses every 20th sample for validation
         train_size = len(loader.stroke_data)
         val_size = len(loader.valid_stroke_data)
 
         assert train_size > 0, "Training set should not be empty"
         assert val_size >= 0, "Validation set should exist"
-        assert train_size + val_size <= 10, "Total samples should not exceed dataset size"
+        assert train_size + val_size <= 20, "Total samples should not exceed dataset size"
 
 
 @pytest.mark.unit
@@ -460,9 +462,9 @@ class TestMiniDatasetFixture:
         with open(mini_dataset_path, 'rb') as f:
             strokes, asciis = pickle.load(f, encoding='latin1')
 
-        # Should have 10 samples
-        assert len(strokes) == 10, "Mini dataset should have 10 samples"
-        assert len(asciis) == 10, "Mini dataset should have 10 text samples"
+        # Should have 20 samples
+        assert len(strokes) == 20, "Mini dataset should have 20 samples"
+        assert len(asciis) == 20, "Mini dataset should have 20 text samples"
 
         # Verify stroke format
         for stroke in strokes:

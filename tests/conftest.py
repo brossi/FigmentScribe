@@ -10,6 +10,12 @@ Usage:
         assert mock_args.rnn_size == 10
 """
 
+# CRITICAL: Configure matplotlib backend BEFORE any imports
+# This must be done before matplotlib is imported anywhere (including sample.py)
+# to prevent GUI windows from popping up during tests
+import matplotlib
+matplotlib.use('Agg')  # Non-GUI backend for headless test execution
+
 import pytest
 import tensorflow as tf
 import numpy as np
@@ -35,7 +41,9 @@ class MockArgs:
         self.nmixtures = kwargs.get('nmixtures', 2)
         self.kmixtures = kwargs.get('kmixtures', 1)
         self.alphabet = kwargs.get('alphabet', ' abcdefghijklmnopqrstuvwxyz')
-        self.tsteps_per_ascii = kwargs.get('tsteps_per_ascii', 25)
+        # CRITICAL: Must be ≤ tsteps to ensure ascii_steps = tsteps // tsteps_per_ascii ≥ 1
+        # Otherwise DataLoader creates empty char_seq tensors
+        self.tsteps_per_ascii = kwargs.get('tsteps_per_ascii', 5)
 
         # Training parameters
         self.batch_size = kwargs.get('batch_size', 4)
@@ -47,6 +55,7 @@ class MockArgs:
 
         # Sampling parameters
         self.bias = kwargs.get('bias', 1.0)
+        self.eos_threshold = kwargs.get('eos_threshold', 0.35)
 
         # Data parameters
         self.data_scale = kwargs.get('data_scale', 50)
@@ -238,28 +247,42 @@ def mini_dataset_path(tmp_path):
     """
     Create a minimal dataset for testing DataLoader.
 
-    Generates a small valid .cpkl file with 10 samples.
+    Generates a small valid .cpkl file with 20 samples.
     """
     import pickle
 
-    # Generate 10 simple samples
+    # Generate 20 simple samples (need 20+ for validation split)
+    # DataLoader puts every 20th sample in validation set
     strokes = []
     asciis = []
 
-    for i in range(10):
-        # Simple stroke data
-        stroke = np.array([
-            [10.0, 0.0, 0.0],
-            [0.0, 10.0, 0.0],
-            [-10.0, 0.0, 0.0],
-            [0.0, -10.0, 1.0],
-        ], dtype=np.float32)
+    for i in range(20):
+        # Generate stroke data with 50 points to handle various tsteps values
+        # Default tests use tsteps=10 (needs >12 points)
+        # Multiline tests use tsteps=30 (needs >32 points)
+        # Using 50 points ensures compatibility with all tests
+        stroke_points = []
+        for j in range(49):
+            # Create a simple repeating pattern
+            if j % 4 == 0:
+                stroke_points.append([10.0, 0.0, 0.0])
+            elif j % 4 == 1:
+                stroke_points.append([0.0, 10.0, 0.0])
+            elif j % 4 == 2:
+                stroke_points.append([-10.0, 0.0, 0.0])
+            else:
+                stroke_points.append([0.0, -10.0, 0.0])
+        # Final point marks end of stroke
+        stroke_points.append([0.0, 0.0, 1.0])
+
+        stroke = np.array(stroke_points, dtype=np.float32)
 
         strokes.append(stroke)
         asciis.append(f"sample {i}")
 
-    # Save to temporary file
-    dataset_path = tmp_path / "mini_data.cpkl"
+    # Save to temporary file with the expected filename
+    # DataLoader looks for "strokes_training_data.cpkl" specifically
+    dataset_path = tmp_path / "strokes_training_data.cpkl"
     with open(dataset_path, 'wb') as f:
         pickle.dump([strokes, asciis], f, protocol=2)
 

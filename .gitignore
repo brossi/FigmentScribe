@@ -9,6 +9,7 @@ __pycache__/
 venv/
 venv-phase1/
 venv-phase2/
+venv-m1/
 env/
 ENV/
 
@@ -57,3 +58,5 @@ archive.zip
 # OS
 .DS_Store
 Thumbs.db
+scribe_web/outputs/
+reference-repos/

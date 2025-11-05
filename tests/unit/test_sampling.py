@@ -521,7 +521,9 @@ class TestSamplingProperties:
         strokes, phis, kappas = sample(text, tiny_model, mock_args)
 
         # Kappa should generally increase (attention moves forward)
-        kappa_values = kappas[:, 0, 0]  # First mixture component
+        # Note: After TensorArray fix, kappas shape is [timesteps, kmixtures]
+        # (was [timesteps, kmixtures, 1] before, singleton dimension removed)
+        kappa_values = kappas[:, 0]  # First mixture component
 
         # Check that kappa increases on average
         # (might have small fluctuations, but trend should be upward)

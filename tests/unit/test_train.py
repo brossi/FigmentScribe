@@ -49,7 +49,8 @@ class TestOptimizerCreation:
 
         assert optimizer is not None
         assert isinstance(optimizer, tf.keras.optimizers.Adam)
-        assert float(optimizer.learning_rate) == 1e-3
+        # Use approximate equality for float32 precision
+        np.testing.assert_allclose(float(optimizer.learning_rate), 1e-3, rtol=1e-6)
 
     def test_rmsprop_optimizer_created(self):
         """Test RMSprop optimizer is created with correct parameters."""
@@ -73,7 +74,8 @@ class TestOptimizerCreation:
 
         assert optimizer is not None
         assert isinstance(optimizer, tf.keras.optimizers.RMSprop)
-        assert float(optimizer.learning_rate) == 1e-4
+        # Use approximate equality for float32 precision
+        np.testing.assert_allclose(float(optimizer.learning_rate), 1e-4, rtol=1e-6)
 
     def test_invalid_optimizer_raises_error(self):
         """Test invalid optimizer name raises ValueError."""
