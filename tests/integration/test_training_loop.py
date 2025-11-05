@@ -30,7 +30,7 @@ class TestTrainingStep:
         """Test training step executes without errors."""
         from model import compute_loss
 
-        optimizer = tf.keras.optimizers.Adam(learning_rate=1e-4)
+        optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=1e-4)
 
         # Training step
         with tf.GradientTape() as tape:
@@ -105,7 +105,7 @@ class TestTrainingStep:
         """Test model weights change after training step."""
         from model import compute_loss
 
-        optimizer = tf.keras.optimizers.Adam(learning_rate=1e-3)
+        optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=1e-3)
 
         # Store initial weights
         initial_weights = [var.numpy().copy() for var in tiny_model.trainable_variables]
@@ -144,7 +144,7 @@ class TestTrainingProgress:
                 pass
 
         data_loader = DataLoader(mock_args, logger=MockLogger())
-        optimizer = tf.keras.optimizers.Adam(learning_rate=1e-3)
+        optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=1e-3)
 
         @tf.function
         def train_step(inputs, targets):
@@ -247,7 +247,7 @@ class TestOptimizers:
         """Test training with Adam optimizer."""
         from model import compute_loss
 
-        optimizer = tf.keras.optimizers.Adam(learning_rate=1e-4)
+        optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=1e-4)
 
         with tf.GradientTape() as tape:
             predictions = tiny_model(sample_batch_inputs, training=True)
@@ -285,7 +285,7 @@ class TestOptimizers:
         """Test learning rate can be adjusted during training."""
         from model import compute_loss
 
-        optimizer = tf.keras.optimizers.Adam(learning_rate=1e-3)
+        optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=1e-3)
 
         # Initial learning rate
         initial_lr = optimizer.learning_rate.numpy()
@@ -330,7 +330,7 @@ class TestTrainingWithDataLoader:
                 pass
 
         data_loader = DataLoader(mock_args, logger=MockLogger())
-        optimizer = tf.keras.optimizers.Adam(learning_rate=1e-3)
+        optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=1e-3)
 
         @tf.function
         def train_step(inputs, targets):
@@ -392,7 +392,7 @@ class TestTrainingWithDataLoader:
                 pass
 
         data_loader = DataLoader(mock_args, logger=MockLogger())
-        optimizer = tf.keras.optimizers.Adam(learning_rate=1e-3)
+        optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=1e-3)
 
         @tf.function
         def train_step(inputs, targets):
@@ -437,7 +437,7 @@ class TestTfFunction:
         """Test training step can be compiled with @tf.function."""
         from model import compute_loss
 
-        optimizer = tf.keras.optimizers.Adam(learning_rate=1e-4)
+        optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=1e-4)
 
         @tf.function
         def train_step(inputs, targets):
@@ -458,7 +458,7 @@ class TestTfFunction:
         """Test @tf.function compilation improves performance."""
         from model import compute_loss
 
-        optimizer = tf.keras.optimizers.Adam(learning_rate=1e-4)
+        optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=1e-4)
 
         # Eager mode training step
         def train_step_eager(inputs, targets):

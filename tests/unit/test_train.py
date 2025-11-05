@@ -43,12 +43,12 @@ class TestOptimizerCreation:
 
         # Test the optimizer creation logic directly
         if args.optimizer == 'adam':
-            optimizer = tf.keras.optimizers.Adam(learning_rate=args.learning_rate)
+            optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=args.learning_rate)
         else:
             optimizer = None
 
         assert optimizer is not None
-        assert isinstance(optimizer, tf.keras.optimizers.Adam)
+        assert isinstance(optimizer, tf.keras.optimizers.legacy.Adam)
         # Use approximate equality for float32 precision
         np.testing.assert_allclose(float(optimizer.learning_rate), 1e-3, rtol=1e-6)
 
@@ -64,7 +64,7 @@ class TestOptimizerCreation:
         args = MockArgs()
 
         if args.optimizer == 'rmsprop':
-            optimizer = tf.keras.optimizers.RMSprop(
+            optimizer = tf.keras.optimizers.legacy.RMSprop(
                 learning_rate=args.learning_rate,
                 rho=args.decay,
                 momentum=args.momentum
@@ -73,7 +73,7 @@ class TestOptimizerCreation:
             optimizer = None
 
         assert optimizer is not None
-        assert isinstance(optimizer, tf.keras.optimizers.RMSprop)
+        assert isinstance(optimizer, tf.keras.optimizers.legacy.RMSprop)
         # Use approximate equality for float32 precision
         np.testing.assert_allclose(float(optimizer.learning_rate), 1e-4, rtol=1e-6)
 
@@ -89,9 +89,9 @@ class TestOptimizerCreation:
         # This should raise ValueError
         with pytest.raises(ValueError, match="Unknown optimizer"):
             if args.optimizer == 'adam':
-                optimizer = tf.keras.optimizers.Adam(learning_rate=args.learning_rate)
+                optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=args.learning_rate)
             elif args.optimizer == 'rmsprop':
-                optimizer = tf.keras.optimizers.RMSprop(learning_rate=args.learning_rate)
+                optimizer = tf.keras.optimizers.legacy.RMSprop(learning_rate=args.learning_rate)
             else:
                 raise ValueError(f"Unknown optimizer: {args.optimizer}")
 
@@ -400,7 +400,7 @@ class TestTrainStepFunction:
         from model import compute_loss
 
         # Define train_step as in train.py
-        optimizer = tf.keras.optimizers.Adam(learning_rate=1e-4)
+        optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=1e-4)
         grad_clip = 10.0
 
         @tf.function
@@ -431,7 +431,7 @@ class TestTrainStepFunction:
         """Test train_step actually updates model weights."""
         from model import compute_loss
 
-        optimizer = tf.keras.optimizers.Adam(learning_rate=1e-3)
+        optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=1e-3)
         grad_clip = 10.0
 
         @tf.function

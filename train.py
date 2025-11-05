@@ -36,10 +36,11 @@ def train(args):
     model = HandwritingModel(args)
 
     # Setup optimizer
+    # Use legacy optimizers for M1/M2 Mac compatibility
     if args.optimizer == 'adam':
-        optimizer = keras.optimizers.Adam(learning_rate=args.learning_rate)
+        optimizer = keras.optimizers.legacy.Adam(learning_rate=args.learning_rate)
     elif args.optimizer == 'rmsprop':
-        optimizer = keras.optimizers.RMSprop(
+        optimizer = keras.optimizers.legacy.RMSprop(
             learning_rate=args.learning_rate,
             rho=args.decay,
             momentum=args.momentum
