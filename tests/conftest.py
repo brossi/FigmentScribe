@@ -47,6 +47,7 @@ class MockArgs:
 
         # Sampling parameters
         self.bias = kwargs.get('bias', 1.0)
+        self.eos_threshold = kwargs.get('eos_threshold', 0.35)
 
         # Data parameters
         self.data_scale = kwargs.get('data_scale', 50)
@@ -238,28 +239,42 @@ def mini_dataset_path(tmp_path):
     """
     Create a minimal dataset for testing DataLoader.
 
-    Generates a small valid .cpkl file with 10 samples.
+    Generates a small valid .cpkl file with 20 samples.
     """
     import pickle
 
-    # Generate 10 simple samples
+    # Generate 20 simple samples (need 20+ for validation split)
+    # DataLoader puts every 20th sample in validation set
     strokes = []
     asciis = []
 
-    for i in range(10):
-        # Simple stroke data
+    for i in range(20):
+        # Simple stroke data with 15 points (more than tsteps+2=12)
+        # This ensures DataLoader doesn't filter them out
         stroke = np.array([
             [10.0, 0.0, 0.0],
             [0.0, 10.0, 0.0],
             [-10.0, 0.0, 0.0],
-            [0.0, -10.0, 1.0],
+            [0.0, -10.0, 0.0],
+            [10.0, 0.0, 0.0],
+            [0.0, 10.0, 0.0],
+            [-10.0, 0.0, 0.0],
+            [0.0, -10.0, 0.0],
+            [5.0, 5.0, 0.0],
+            [-5.0, 5.0, 0.0],
+            [5.0, -5.0, 0.0],
+            [-5.0, -5.0, 0.0],
+            [0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0],  # End of stroke
         ], dtype=np.float32)
 
         strokes.append(stroke)
         asciis.append(f"sample {i}")
 
-    # Save to temporary file
-    dataset_path = tmp_path / "mini_data.cpkl"
+    # Save to temporary file with the expected filename
+    # DataLoader looks for "strokes_training_data.cpkl" specifically
+    dataset_path = tmp_path / "strokes_training_data.cpkl"
     with open(dataset_path, 'wb') as f:
         pickle.dump([strokes, asciis], f, protocol=2)
 
