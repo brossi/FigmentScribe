@@ -257,25 +257,25 @@ def mini_dataset_path(tmp_path):
     asciis = []
 
     for i in range(20):
-        # Simple stroke data with 15 points (more than tsteps+2=12)
-        # This ensures DataLoader doesn't filter them out
-        stroke = np.array([
-            [10.0, 0.0, 0.0],
-            [0.0, 10.0, 0.0],
-            [-10.0, 0.0, 0.0],
-            [0.0, -10.0, 0.0],
-            [10.0, 0.0, 0.0],
-            [0.0, 10.0, 0.0],
-            [-10.0, 0.0, 0.0],
-            [0.0, -10.0, 0.0],
-            [5.0, 5.0, 0.0],
-            [-5.0, 5.0, 0.0],
-            [5.0, -5.0, 0.0],
-            [-5.0, -5.0, 0.0],
-            [0.0, 0.0, 0.0],
-            [0.0, 0.0, 0.0],
-            [0.0, 0.0, 1.0],  # End of stroke
-        ], dtype=np.float32)
+        # Generate stroke data with 50 points to handle various tsteps values
+        # Default tests use tsteps=10 (needs >12 points)
+        # Multiline tests use tsteps=30 (needs >32 points)
+        # Using 50 points ensures compatibility with all tests
+        stroke_points = []
+        for j in range(49):
+            # Create a simple repeating pattern
+            if j % 4 == 0:
+                stroke_points.append([10.0, 0.0, 0.0])
+            elif j % 4 == 1:
+                stroke_points.append([0.0, 10.0, 0.0])
+            elif j % 4 == 2:
+                stroke_points.append([-10.0, 0.0, 0.0])
+            else:
+                stroke_points.append([0.0, -10.0, 0.0])
+        # Final point marks end of stroke
+        stroke_points.append([0.0, 0.0, 1.0])
+
+        stroke = np.array(stroke_points, dtype=np.float32)
 
         strokes.append(stroke)
         asciis.append(f"sample {i}")

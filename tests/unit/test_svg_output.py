@@ -431,7 +431,8 @@ class TestSaveAsSVG:
         # Verify parameters are used
         with open(output_path, 'r') as f:
             content = f.read()
-            assert 'viewBox="0 0 2000' in content, "Custom view_width should be used"
+            # SVG uses comma-separated viewBox format: viewBox="x,y,width,height"
+            assert 'viewBox="0,0,2000' in content, "Custom view_width should be used"
             assert 'stroke="blue"' in content, "Custom stroke_color should be used"
             assert 'stroke-width="3"' in content, "Custom stroke_width should be used"
 

@@ -289,14 +289,16 @@ class TestOptimizers:
 
         # Initial learning rate
         initial_lr = optimizer.learning_rate.numpy()
-        assert initial_lr == 1e-3
+        # Use approximate equality for float32 precision
+        np.testing.assert_allclose(initial_lr, 1e-3, rtol=1e-6)
 
         # Adjust learning rate
         optimizer.learning_rate.assign(5e-4)
 
         # Verify it changed
         new_lr = optimizer.learning_rate.numpy()
-        assert new_lr == 5e-4
+        # Use approximate equality for float32 precision
+        np.testing.assert_allclose(new_lr, 5e-4, rtol=1e-6)
 
         # Training step should work with new learning rate
         with tf.GradientTape() as tape:

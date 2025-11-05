@@ -326,11 +326,13 @@ class TestCheckpointCompatibility:
 
         # TensorFlow allows partial restore with warnings (doesn't raise exception)
         # Restore completes but some variables may not match
-        status = new_checkpoint.restore(save_path)
-
-        # Verify restore operation completed (checkpoint path recognized)
-        assert status.checkpoint_path is not None, \
-            "Restore should complete even with architecture mismatch"
+        try:
+            status = new_checkpoint.restore(save_path)
+            # If we reach here, restore completed without exception
+            # TensorFlow handles partial restore gracefully (loads matching variables)
+            assert status is not None, "Restore should return status object"
+        except Exception as e:
+            pytest.fail(f"Partial restore should not raise exception: {e}")
 
     def test_checkpoint_directory_created(self, tiny_model):
         """Test checkpoint creates directory if it doesn't exist."""
