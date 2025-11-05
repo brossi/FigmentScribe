@@ -217,6 +217,10 @@ def to_one_hot(s, ascii_steps, alphabet):
 class Logger():
     def __init__(self, args):
         self.logf = '{}train_scribe.txt'.format(args.log_dir) if args.train else '{}sample_scribe.txt'.format(args.log_dir)
+        # Create log directory if it doesn't exist
+        log_dir = os.path.dirname(self.logf)
+        if log_dir:  # Only create if there's a directory component
+            os.makedirs(log_dir, exist_ok=True)
         with open(self.logf, 'w') as f: f.write("Scribe: Realistic Handriting in Tensorflow\n     by Sam Greydanus\n\n\n")
 
     def write(self, s, print_it=True):
