@@ -167,21 +167,30 @@ class HandwritingModel(keras.Model):
         # Process each timestep through attention mechanism
         timesteps = tf.shape(stroke_data)[1]
 
-        # Compute windows for all timesteps
-        windows = []
-        phis = []
-        kappas = [kappa]
+        # Use TensorArrays for graph-compatible accumulation
+        # TensorArrays work correctly in @tf.function graph mode,
+        # unlike Python lists which cause scope errors
+        windows_ta = tf.TensorArray(dtype=tf.float32, size=timesteps, dynamic_size=False)
+        phis_ta = tf.TensorArray(dtype=tf.float32, size=timesteps, dynamic_size=False)
+
+        # Track kappa across timesteps
+        current_kappa = kappa
 
         # Note: This loop is necessary because attention mechanism depends on previous kappa
-        for t in range(timesteps):
+        # tf.range() creates a graph-compatible iterator (not Python range())
+        for t in tf.range(timesteps):
             lstm0_t = lstm0_out[:, t, :]
-            window, phi, kappa = self.get_window(lstm0_t, kappas[-1], char_seq)
-            windows.append(window)
-            phis.append(phi)
-            kappas.append(kappa)
+            window, phi, current_kappa = self.get_window(lstm0_t, current_kappa, char_seq)
+            windows_ta = windows_ta.write(t, window)
+            phis_ta = phis_ta.write(t, phi)
 
-        windows = tf.stack(windows, axis=1)  # [batch, timesteps, alphabet_size]
-        phis = tf.stack(phis, axis=1)  # [batch, timesteps, 1, seq_len]
+        # Stack TensorArrays and transpose to correct shape
+        # TensorArray.stack() produces [timesteps, batch, ...], we need [batch, timesteps, ...]
+        windows = tf.transpose(windows_ta.stack(), [1, 0, 2])  # [batch, timesteps, alphabet_size]
+        phis = tf.transpose(phis_ta.stack(), [1, 0, 2, 3])     # [batch, timesteps, 1, seq_len]
+
+        # Update kappa for return
+        kappa = current_kappa
 
         # Concatenate LSTM output with window and input
         lstm0_augmented = tf.concat([lstm0_out, windows, stroke_data], axis=-1)
@@ -238,7 +247,7 @@ class HandwritingModel(keras.Model):
             'sigma2': sigma2,
             'rho': rho,
             'phi': phis,
-            'kappa': kappas[-1],
+            'kappa': kappa,
             'states': [(h0, c0), (h1, c1), (h2, c2)],
             # Raw parameters for bias adjustment during sampling
             'pi_hat': pi_hat,
