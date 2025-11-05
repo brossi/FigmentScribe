@@ -107,14 +107,32 @@ python3 train.py --rnn_size 400 --nmixtures 20 --nepochs 250
 
 **Standard (CPU/GPU)**:
 ```bash
-pip install tensorflow==2.15.0 numpy==1.26.4 matplotlib==3.8.3
+pip install -r requirements.txt
 ```
 
-**Apple Silicon (M1/M2/M3)**:
+**Apple Silicon (M1/M2/M3)** 🍎:
+
+For M1/M2/M3 Macs, use the M1-specific requirements file:
+
 ```bash
-pip install tensorflow-macos==2.15.0 tensorflow-metal==1.1.0
-pip install numpy==1.26.4 matplotlib==3.8.3
+# Quick install
+pip install -r requirements-m1.txt
+
+# OR automated install with verification
+chmod +x scripts/setup-m1.sh
+./scripts/setup-m1.sh
 ```
+
+**⚠️ CRITICAL for M1 users:**
+- Must use `tensorflow-macos` (NOT regular `tensorflow`)
+- Must have `numpy<2.0` (numpy 2.x breaks TensorFlow 2.15)
+- Metal GPU acceleration provides 2-3x speedup over CPU
+
+**Complete M1 setup guide**: See **[docs/M1_SETUP.md](docs/M1_SETUP.md)** for:
+- Detailed installation instructions
+- Troubleshooting common issues
+- Performance optimization tips
+- Development workflow recommendations
 
 ---
 

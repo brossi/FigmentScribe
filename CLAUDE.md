@@ -75,6 +75,50 @@ python train.py \
 # Cost: ~$10-12 total (Colab Pro $10 subscription + ~$1-2 compute units)
 ```
 
+### M1 Mac Local Development (NEW!)
+```bash
+# For Apple Silicon (M1/M2/M3) Macs - local development and testing
+# See: docs/M1_SETUP.md for complete guide
+
+# Quick setup (automated)
+chmod +x scripts/setup-m1.sh
+./scripts/setup-m1.sh
+
+# Manual setup
+python3.11 -m venv venv-m1
+source venv-m1/bin/activate
+pip install --upgrade pip
+pip install -r requirements-m1.txt
+pip install -r requirements-test.txt  # Optional, for testing
+
+# Verify installation
+python3 verify_data.py              # Should show 11,916 samples
+pytest -m smoke                     # Should pass all smoke tests
+python3 -c "import tensorflow as tf; print('TF:', tf.__version__)"
+
+# Check Metal GPU (optional, tests use CPU)
+python3 -c "import tensorflow as tf; print('GPU:', tf.config.list_physical_devices('GPU'))"
+
+# Development workflow
+pytest -m smoke                      # Fast validation (< 30s)
+python3 sample.py --text "Test"      # Quick generation test
+python3 train.py --nepochs 5         # Small training test (optional)
+
+# ⚠️ CRITICAL M1 Requirements:
+# - Must use tensorflow-macos (NOT tensorflow)
+# - Must have numpy<2.0 (numpy 2.x breaks TensorFlow 2.15)
+# - Metal GPU provides 2-3x speedup (but tests run on CPU for determinism)
+
+# Performance on M1:
+# - Training (250 epochs, rnn_size=400): 6-12 hours (vs 3-6 hours on NVIDIA GPU)
+# - Sampling (single line): 2-5 seconds
+# - Smoke tests: ~5 seconds
+
+# When to use M1 vs Colab:
+# M1: Testing, development, quick experiments, sampling/generation
+# Colab: Full training (250 epochs), large models (rnn_size=900)
+```
+
 ### Sampling (Python 3.11 + TensorFlow 2.15 - PRIMARY)
 ```bash
 # Single-line generation

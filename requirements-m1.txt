@@ -1,0 +1,66 @@
+# M1 Mac (Apple Silicon) Requirements
+# Python 3.11+ compatible
+# Use this file instead of requirements.txt on Apple Silicon Macs
+
+# TensorFlow for Apple Silicon
+# CRITICAL: Must install tensorflow-macos BEFORE other packages
+tensorflow-macos==2.15.0    # Apple's M1-optimized TensorFlow build
+tensorflow-metal==1.1.0     # Metal GPU acceleration plugin for M1/M2/M3
+
+# NumPy - CRITICAL VERSION CONSTRAINT
+# TensorFlow 2.15 requires numpy<2.0
+# If you have numpy 2.x installed, TensorFlow will fail to import
+numpy>=1.26.4,<2.0          # Compatible with TF 2.15 (NOT numpy 2.x)
+
+# Visualization and Processing
+matplotlib==3.8.3           # Plotting and visualization
+scipy==1.12.0               # Signal processing (for SVG smoothing)
+svgwrite==1.4.3             # SVG generation (for pen plotter output)
+
+# Optional: Jupyter notebooks
+jupyter==1.0.0              # Notebook support (for dataloader.ipynb, sample.ipynb)
+
+# Installation Instructions:
+# ========================
+#
+# 1. Create a clean virtual environment:
+#    python3.11 -m venv venv-m1
+#    source venv-m1/bin/activate
+#
+# 2. Upgrade pip:
+#    pip install --upgrade pip
+#
+# 3. Install dependencies (IN THIS ORDER - order matters!):
+#    pip install tensorflow-macos==2.15.0
+#    pip install tensorflow-metal==1.1.0
+#    pip install "numpy>=1.26.4,<2.0"
+#    pip install matplotlib==3.8.3 scipy==1.12.0 svgwrite==1.4.3 jupyter==1.0.0
+#
+# 4. OR install all at once:
+#    pip install -r requirements-m1.txt
+#
+# 5. Verify installation:
+#    python3 verify_data.py
+#    pytest -m smoke
+#
+# Troubleshooting:
+# ===============
+#
+# If you see "ImportError: numpy.core.multiarray failed to import":
+#   - You likely have numpy 2.x installed
+#   - Uninstall: pip uninstall numpy
+#   - Reinstall: pip install "numpy>=1.26.4,<2.0"
+#
+# If TensorFlow doesn't detect Metal GPU:
+#   - Check: python3 -c "import tensorflow as tf; print(tf.config.list_physical_devices('GPU'))"
+#   - Should show Metal GPU device
+#   - If not, reinstall: pip install --upgrade --force-reinstall tensorflow-metal==1.1.0
+#
+# Performance Notes:
+# ==================
+# - Metal GPU: 2-3x faster than CPU on M1/M2/M3
+# - Training (rnn_size=400): ~6-12 hours on M1 vs 3-6 hours on NVIDIA GPU
+# - Sampling: Fast (seconds per image) with Metal acceleration
+# - Tests: Run on CPU only (GPU disabled in conftest.py for determinism)
+#
+# See docs/M1_SETUP.md for detailed installation guide

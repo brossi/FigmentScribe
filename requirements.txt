@@ -1,16 +1,24 @@
 # Phase 2: TensorFlow 2.x requirements
 # Python 3.11+ compatible
 
-tensorflow==2.15.0  # or tensorflow-macos==2.15.0 on Apple Silicon
-numpy==1.26.4       # Compatible with TF 2.15
+# ⚠️ APPLE SILICON (M1/M2/M3) USERS:
+# Use requirements-m1.txt instead of this file!
+# See docs/M1_SETUP.md for complete installation guide.
+
+tensorflow==2.15.0  # Standard TensorFlow (Linux/Windows/x86 Mac)
+numpy==1.26.4       # Compatible with TF 2.15 (MUST be <2.0)
 matplotlib==3.8.3   # Visualization
 scipy==1.12.0       # Signal processing (for SVG smoothing)
 svgwrite==1.4.3     # SVG generation (for pen plotter output)
 jupyter==1.0.0      # Notebook support (optional)
 
 # Installation:
+#
+# Standard installation (Linux/Windows/x86):
 #   pip install -r requirements.txt
 #
-# For Apple Silicon Macs:
-#   pip install tensorflow-macos==2.15.0 tensorflow-metal==1.1.0
-#   pip install numpy==1.26.4 matplotlib==3.8.3
+# Apple Silicon (M1/M2/M3) installation:
+#   pip install -r requirements-m1.txt
+#   OR run automated installer: ./scripts/setup-m1.sh
+#
+# See docs/M1_SETUP.md for detailed M1 setup instructions
