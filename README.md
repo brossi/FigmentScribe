@@ -408,6 +408,80 @@ Complete setup guide with troubleshooting: **[docs/COLAB_SETUP.md](docs/COLAB_SE
 
 ---
 
+## ☁️ Cloud Training on Google Cloud Vertex AI (NEW!)
+
+**Command-line cloud training** with full control over GPU selection and cheaper pricing than Colab.
+
+### Why Vertex AI?
+
+- ✅ **One-command submission** - No manual notebook interaction
+- ✅ **Cheaper** - T4 GPU at $0.79/hr vs Colab Pro's $1.67/hr
+- ✅ **More control** - Choose exact GPU type (T4, V100, A100)
+- ✅ **Programmatic monitoring** - Track progress from CLI
+- ✅ **Production-ready** - Auto-resume, logging, error handling
+
+### Quick Start
+
+```bash
+# 1. One-time setup (10 minutes)
+gcloud auth login
+gcloud config set project YOUR_PROJECT_ID
+gsutil mb -l us-central1 gs://my-scribe-bucket
+gsutil cp data/strokes_training_data.cpkl gs://my-scribe-bucket/data/
+
+# 2. Submit training job (single command!)
+python3 submit_training.py \
+    --rnn_size 400 \
+    --nepochs 250 \
+    --gpu-type t4 \
+    --bucket my-scribe-bucket
+
+# 3. Monitor progress
+python3 monitor_training.py JOBNAME --follow
+
+# 4. Download results
+python3 download_results.py --bucket my-scribe-bucket
+```
+
+### Cost Comparison
+
+| Method | GPU | Cost (250 epochs) | Time |
+|--------|-----|-------------------|------|
+| **Vertex AI (T4)** | T4 | **$4.90** | 6 hrs |
+| Colab Pro | T4/V100 | ~$10-12 | 3-6 hrs |
+| M1 Mac (8GB) | Metal GPU | Free | 9-12 hrs |
+
+**Vertex AI is the cheapest cloud option!**
+
+### Prerequisites
+
+- Google Cloud account (new users get $300 credit)
+- gcloud CLI: `brew install google-cloud-sdk`
+- Docker: For building training containers
+
+### Documentation
+
+Complete setup guide with examples: **[docs/VERTEX_AI_SETUP.md](docs/VERTEX_AI_SETUP.md)**
+
+**Topics covered:**
+- Initial GCP setup (project, APIs, bucket)
+- Submitting training jobs
+- Monitoring and log streaming
+- Downloading results
+- Cost optimization strategies
+- Troubleshooting common issues
+
+### Which Cloud Option Should I Use?
+
+| Use Case | Recommendation |
+|----------|---------------|
+| First-time cloud user | **Colab** (simpler setup) |
+| Production training | **Vertex AI** (cheaper, more control) |
+| Multiple training runs | **Vertex AI** (better cost per run) |
+| One-off experiment | **Colab** (faster to start) |
+
+---
+
 ## 🧪 Testing
 
 Scribe includes a comprehensive test suite to ensure code quality and catch regressions.

@@ -60,3 +60,14 @@ archive.zip
 Thumbs.db
 scribe_web/outputs/
 reference-repos/
+
+# Google Cloud Platform
+gcp-key.json
+service-account*.json
+*.json.key
+.gcp/
+.config/gcloud/
+application_default_credentials.json
+
+# Docker
+.dockerignore
