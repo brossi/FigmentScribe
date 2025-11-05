@@ -10,6 +10,12 @@ Usage:
         assert mock_args.rnn_size == 10
 """
 
+# CRITICAL: Configure matplotlib backend BEFORE any imports
+# This must be done before matplotlib is imported anywhere (including sample.py)
+# to prevent GUI windows from popping up during tests
+import matplotlib
+matplotlib.use('Agg')  # Non-GUI backend for headless test execution
+
 import pytest
 import tensorflow as tf
 import numpy as np
